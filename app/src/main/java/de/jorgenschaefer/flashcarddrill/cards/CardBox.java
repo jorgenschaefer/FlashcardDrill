@@ -41,7 +41,6 @@ public class CardBox {
         decks[deckNum].add(card);
     }
 
-
     public int getFirstNonemptyDeck() {
         for (int i = 0; i < decks.length; i++) {
             if (!decks[i].isEmpty()) {
