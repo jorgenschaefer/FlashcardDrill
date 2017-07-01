@@ -1,10 +1,22 @@
-package de.jorgenschaefer.flashcarddrill.cards;
+package de.jorgenschaefer.flashcarddrill;
 
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import de.jorgenschaefer.flashcarddrill.cards.Card;
+import de.jorgenschaefer.flashcarddrill.cards.CardBox;
+import de.jorgenschaefer.flashcarddrill.cards.CardBoxLoader;
+import de.jorgenschaefer.flashcarddrill.cards.DrillSystem;
+import de.jorgenschaefer.flashcarddrill.db.CardDbHelper;
 
 import static org.junit.Assert.*;
 
+@RunWith(AndroidJUnit4.class)
 public class DrillSystemTest {
     private Card card;
     private DrillSystem emptyDrill;
@@ -12,9 +24,15 @@ public class DrillSystemTest {
 
     @Before
     public void setUp() {
-        card = new Card("Q", "A");
-        emptyDrill = new DrillSystem(null);
-        drill = new DrillSystem(new TestLoader(new Card[]{card}));
+        card = new Card(0, "Q", "A");
+        CardDbHelper dbHelper = new CardDbHelper(InstrumentationRegistry.getTargetContext());
+        emptyDrill = new DrillSystem(null, dbHelper);
+        drill = new DrillSystem(new TestLoader(new Card[]{card}), dbHelper);
+    }
+
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getTargetContext().deleteDatabase(CardDbHelper.DATABASE_NAME);
     }
 
     @Test

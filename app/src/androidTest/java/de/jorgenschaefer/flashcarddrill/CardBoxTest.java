@@ -1,28 +1,46 @@
-package de.jorgenschaefer.flashcarddrill.cards;
+package de.jorgenschaefer.flashcarddrill;
 
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import de.jorgenschaefer.flashcarddrill.cards.Card;
+import de.jorgenschaefer.flashcarddrill.cards.CardBox;
+import de.jorgenschaefer.flashcarddrill.db.CardContract;
+import de.jorgenschaefer.flashcarddrill.db.CardDbHelper;
 
 import static org.junit.Assert.*;
 
 
+@RunWith(AndroidJUnit4.class)
 public class CardBoxTest {
     private int NUM_DECKS = 5;
     private CardBox box;
 
     @Before
     public void setUp() {
-        box = new CardBox(NUM_DECKS);
+        CardDbHelper dbHelper = new CardDbHelper(InstrumentationRegistry.getTargetContext());
+        box = new CardBox(NUM_DECKS, dbHelper);
+    }
+
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getTargetContext().deleteDatabase(CardDbHelper.DATABASE_NAME);
     }
 
     @Test
-    public void shouldCreateEmptyBox() {
+    public void testShouldCreateEmptyBox() {
         assertArrayEquals(box.getDeckSizes(), new int[]{0, 0, 0, 0, 0});
     }
 
     @Test
     public void shouldAddCards() {
-        Card card = new Card("", "");
+        Card card = new Card(0, "", "");
         box.addCard(0, card);
 
         assertArrayEquals(box.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
@@ -31,7 +49,7 @@ public class CardBoxTest {
 
     @Test
     public void shouldNotDuplicateCards() {
-        Card card = new Card("", "");
+        Card card = new Card(0, "", "");
         box.addCard(0, card);
         box.addCard(1, card);
 
@@ -41,7 +59,7 @@ public class CardBoxTest {
 
     @Test
     public void shouldNotPutCardsAfterLastSlot() {
-        Card card = new Card("", "");
+        Card card = new Card(0, "", "");
         box.addCard(10, card);
 
         assertArrayEquals(box.getDeckSizes(), new int[]{0, 0, 0, 0, 1});
@@ -49,7 +67,7 @@ public class CardBoxTest {
 
     @Test
     public void shouldReturnNonemptyBucket() {
-        Card card = new Card("", "");
+        Card card = new Card(0, "", "");
         box.addCard(0, card);
         assertEquals(box.getFirstNonemptyDeck(), 0);
         box.addCard(3, card);
@@ -59,8 +77,8 @@ public class CardBoxTest {
 
     @Test
     public void shouldReturnCards() {
-        Card card1 = new Card("", "");
-        Card card2 = new Card("", "");
+        Card card1 = new Card(0, "", "");
+        Card card2 = new Card(1, "", "");
         box.addCard(0, card1);
         box.addCard(1, card2);
 

@@ -1,13 +1,16 @@
 package de.jorgenschaefer.flashcarddrill.cards;
 
+import de.jorgenschaefer.flashcarddrill.db.CardDbHelper;
+
 public class DrillSystem {
     int NUM_DECKS = 5;
 
-    private CardBox box = new CardBox(NUM_DECKS);
     private int currentDeck = 0;
+    private CardBox box;
     private Card currentCard;
 
-    public DrillSystem(CardBoxLoader loader) {
+    public DrillSystem(CardBoxLoader loader, CardDbHelper dbHelper) {
+        box = new CardBox(NUM_DECKS, dbHelper);
         if (loader != null) {
             loader.load(box);
         }

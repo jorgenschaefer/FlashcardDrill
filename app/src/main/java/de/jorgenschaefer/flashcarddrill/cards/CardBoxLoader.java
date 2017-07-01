@@ -1,5 +1,5 @@
 package de.jorgenschaefer.flashcarddrill.cards;
 
-interface CardBoxLoader {
-    public void load(CardBox box);
+public interface CardBoxLoader {
+    void load(CardBox box);
 }
