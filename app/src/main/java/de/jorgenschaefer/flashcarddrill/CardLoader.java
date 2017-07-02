@@ -29,7 +29,7 @@ public class CardLoader extends AsyncTask<InputStream, Void, Void> {
                 id++;
                 String question = row[0];
                 String answer = row[1];
-                dbHelper.addCard(0, new Card(id, question, answer));
+                dbHelper.addOrUpdateCard(new Card(id, question, answer));
             }
         } catch (IOException e) {
         }

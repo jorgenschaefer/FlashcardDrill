@@ -176,4 +176,33 @@ public class CardsDbHelper extends SQLiteOpenHelper {
         cursor.close();
         return card;
     }
+
+    public void addOrUpdateCard(Card card) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CardsDbContract.Card.QUESTION, card.getQuestion());
+        values.put(CardsDbContract.Card.ANSWER, card.getAnswer());
+
+        if (getCardById(card.getId()) == null) {
+            values.put(CardsDbContract.Card.DECK, 0);
+            values.put(CardsDbContract.Card._ID, card.getId());
+            db.insert(
+                    CardsDbContract.Card.TABLE_NAME,
+                    null,
+                    values
+            );
+        } else {
+            String where = CardsDbContract.Card._ID + " = ?";
+            String whereArgs[] = { Integer.toString(card.getId()) };
+            db.update(
+                    CardsDbContract.Card.TABLE_NAME,
+                    values,
+                    where,
+                    whereArgs
+            );
+        }
+        if (changeListener != null) {
+            changeListener.onDatabaseChange();
+        }
+    }
 }
