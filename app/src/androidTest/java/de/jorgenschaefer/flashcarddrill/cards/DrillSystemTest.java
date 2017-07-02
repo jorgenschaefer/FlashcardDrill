@@ -12,6 +12,7 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbContract;
 
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -99,5 +100,31 @@ public class DrillSystemTest {
         drill.getCurrentQuestion();
         drill.markAnswerWrong();
         assertEquals(drill.getCurrentDeck(), 0);
+    }
+
+    @Test
+    public void shouldCallChangeListener() {
+        TestChangeListener listener = new TestChangeListener();
+        addTestCard();
+        drill.getCurrentQuestion();
+        drill.setChangeListener(listener);
+        drill.markAnswerCorrect();
+        assertTrue(listener.cardChanged);
+        assertTrue(listener.deckSizesChanged);
+    }
+
+    class TestChangeListener implements DrillSystemChangeListener {
+        boolean cardChanged = false;
+        boolean deckSizesChanged = false;
+
+        @Override
+        public void onCurrentCardChanged() {
+            cardChanged = true;
+        }
+
+        @Override
+        public void onDeckSizesChanged() {
+            deckSizesChanged = true;
+        }
     }
 }

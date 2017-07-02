@@ -11,9 +11,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import de.jorgenschaefer.flashcarddrill.cards.DrillSystem;
+import de.jorgenschaefer.flashcarddrill.cards.DrillSystemChangeListener;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, DrillSystemChangeListener {
 
     DrillSystem drill;
     TextView statusText;
@@ -42,46 +43,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new DrillSystem(dbHelper);
+        drill.setChangeListener(this);
         cardText.setText(drill.getCurrentQuestion());
-        setStatusText();
+        updateStatusText();
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonShow:
-                cardText.setText(drill.getCurrentAnswer());
-                setStatusText();
-                showButton.setVisibility(View.GONE);
-                rightButton.setVisibility(View.VISIBLE);
-                wrongButton.setVisibility(View.VISIBLE);
+                displayAnswer();
                 break;
             case R.id.buttonRight:
                 drill.markAnswerCorrect();
-                cardText.setText(drill.getCurrentQuestion());
-                setStatusText();
-                showButton.setVisibility(View.VISIBLE);
-                rightButton.setVisibility(View.GONE);
-                wrongButton.setVisibility(View.GONE);
                 break;
             case R.id.buttonWrong:
                 drill.markAnswerWrong();
-                cardText.setText(drill.getCurrentQuestion());
-                setStatusText();
-                showButton.setVisibility(View.VISIBLE);
-                rightButton.setVisibility(View.GONE);
-                wrongButton.setVisibility(View.GONE);
                 break;
         }
     }
 
-    private void setStatusText() {
+    private void updateStatusText() {
         String status = "Current deck: " + (drill.getCurrentDeck() + 1);
         status += " | Sizes: ";
         for (int size : drill.getDeckSizes()) {
             status += size + " / ";
         }
         statusText.setText(status);
+    }
+
+    private void displayQuestion() {
+        cardText.setText(drill.getCurrentQuestion());
+        showButton.setVisibility(View.VISIBLE);
+        rightButton.setVisibility(View.GONE);
+        wrongButton.setVisibility(View.GONE);
+    }
+
+    private void displayAnswer() {
+        cardText.setText(drill.getCurrentAnswer());
+        showButton.setVisibility(View.GONE);
+        rightButton.setVisibility(View.VISIBLE);
+        wrongButton.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -107,5 +109,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCurrentCardChanged() {
+        displayQuestion();
+    }
+
+    @Override
+    public void onDeckSizesChanged() {
+        updateStatusText();
     }
 }

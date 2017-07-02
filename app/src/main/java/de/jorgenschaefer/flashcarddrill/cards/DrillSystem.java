@@ -1,12 +1,14 @@
 package de.jorgenschaefer.flashcarddrill.cards;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
+import de.jorgenschaefer.flashcarddrill.db.CardsDbChangeListener;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
 public class DrillSystem {
     private CardsDbHelper dbHelper;
     private Card currentCard;
     private int currentDeck = 0;
+    private DrillSystemChangeListener changeListener;
 
     public DrillSystem(CardsDbHelper dbHelper) {
         this.dbHelper = dbHelper;
@@ -57,5 +59,13 @@ public class DrillSystem {
             currentDeck = dbHelper.getFirstNonemptyDeck();
             currentCard = dbHelper.getRandomCardFromDeck(currentDeck);
         }
+        if (changeListener != null) {
+            changeListener.onCurrentCardChanged();
+            changeListener.onDeckSizesChanged();
+        }
+    }
+
+    public void setChangeListener(DrillSystemChangeListener changeListener) {
+        this.changeListener = changeListener;
     }
 }
