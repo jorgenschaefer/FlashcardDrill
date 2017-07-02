@@ -66,7 +66,6 @@ public class DrillSystemTest {
     public void shouldMarkAnswerCorrectly() {
         addTestCard();
         assertArrayEquals(drill.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
-        drill.getCurrentQuestion();
         drill.markAnswerCorrect();
         assertArrayEquals(drill.getDeckSizes(), new int[]{0, 1, 0, 0, 0});
     }
@@ -74,10 +73,8 @@ public class DrillSystemTest {
     @Test
     public void shouldMarkAnswerWrong() {
         addTestCard();
-        drill.getCurrentQuestion();
         drill.markAnswerCorrect();
         assertArrayEquals(drill.getDeckSizes(), new int[]{0, 1, 0, 0, 0});
-        drill.getCurrentQuestion();
         drill.markAnswerWrong();
         assertArrayEquals(drill.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
     }
@@ -86,7 +83,6 @@ public class DrillSystemTest {
     public void shouldAdvanceWhenSlotIsEmpty() {
         addTestCard();
         assertEquals(drill.getCurrentDeck(), 0);
-        drill.getCurrentQuestion();
         drill.markAnswerCorrect();
         assertEquals(drill.getCurrentDeck(), 1);
     }
@@ -94,10 +90,8 @@ public class DrillSystemTest {
     @Test
     public void shouldRestartWhenSlotIsEmptyAndPriorSlotsAreFull() {
         addTestCard();
-        drill.getCurrentQuestion();
         drill.markAnswerCorrect();
         assertEquals(drill.getCurrentDeck(), 1);
-        drill.getCurrentQuestion();
         drill.markAnswerWrong();
         assertEquals(drill.getCurrentDeck(), 0);
     }
@@ -106,7 +100,6 @@ public class DrillSystemTest {
     public void shouldCallChangeListener() {
         TestChangeListener listener = new TestChangeListener();
         addTestCard();
-        drill.getCurrentQuestion();
         drill.setChangeListener(listener);
         drill.markAnswerCorrect();
         assertTrue(listener.cardChanged);

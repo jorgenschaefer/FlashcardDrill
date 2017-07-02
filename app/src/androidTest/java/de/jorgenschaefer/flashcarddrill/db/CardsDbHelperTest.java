@@ -27,11 +27,6 @@ public class CardsDbHelperTest {
     }
 
     @Test
-    public void testShouldCreateEmptyBox() {
-        assertArrayEquals(dbHelper.getDeckSizes(), new int[]{0, 0, 0, 0, 0});
-    }
-
-    @Test
     public void shouldAddCards() {
         Card card = new Card(0, "", "");
         dbHelper.addCard(0, card);
@@ -66,7 +61,6 @@ public class CardsDbHelperTest {
         dbHelper.addCard(3, card);
         assertEquals(dbHelper.getFirstNonemptyDeck(), 3);
     }
-
 
     @Test
     public void shouldReturnCards() {

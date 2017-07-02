@@ -1,4 +1,4 @@
-package de.jorgenschaefer.flashcarddrill;
+package de.jorgenschaefer.flashcarddrill.db;
 
 import org.junit.Before;
 import org.junit.Test;
