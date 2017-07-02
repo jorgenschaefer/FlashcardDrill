@@ -14,6 +14,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
             CardsDbContract.Card.QUESTION + " TEXT, " +
             CardsDbContract.Card.ANSWER + " TEXT, " +
             CardsDbContract.Card.DECK + " INT) ";
+    private CardsDbChangeListener changeListener;
 
     public CardsDbHelper(Context context) {
         super(context, CardsDbContract.DATABASE_NAME, null, CardsDbContract.DATABASE_VERSION);
@@ -111,6 +112,9 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                     values
             );
         }
+        if (changeListener != null) {
+            changeListener.onDatabaseChange();
+        }
     }
 
     public int getFirstNonemptyDeck() {
@@ -134,5 +138,9 @@ public class CardsDbHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return bucket;
+    }
+
+    public void setChangeListener(CardsDbChangeListener changeListener) {
+        this.changeListener = changeListener;
     }
 }

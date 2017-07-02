@@ -37,7 +37,6 @@ public class DrillSystemTest {
 
     private void addTestCard() {
         dbHelper.addCard(0, card);
-        drill.onDbChanged();
     }
 
     @Test

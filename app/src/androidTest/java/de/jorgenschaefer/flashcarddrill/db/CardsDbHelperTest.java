@@ -54,6 +54,23 @@ public class CardsDbHelperTest {
     }
 
     @Test
+    public void shouldRunOnDbChanged() {
+        Card card = new Card(0, "", "");
+        TestOnDbChanged listener = new TestOnDbChanged();
+        dbHelper.setChangeListener(listener);
+        dbHelper.addCard(0, card);
+        assertTrue(listener.dbChanged);
+    }
+
+    private class TestOnDbChanged implements CardsDbChangeListener {
+        boolean dbChanged = false;
+
+        @Override
+        public void onDatabaseChange() {
+            dbChanged = true;
+        }
+    }
+    @Test
     public void shouldReturnNonemptyBucket() {
         Card card = new Card(0, "", "");
         dbHelper.addCard(0, card);

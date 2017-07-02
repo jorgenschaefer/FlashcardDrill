@@ -4,7 +4,7 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbChangeListener;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
-public class DrillSystem {
+public class DrillSystem implements CardsDbChangeListener {
     private CardsDbHelper dbHelper;
     private Card currentCard;
     private int currentDeck = 0;
@@ -12,13 +12,8 @@ public class DrillSystem {
 
     public DrillSystem(CardsDbHelper dbHelper) {
         this.dbHelper = dbHelper;
+        dbHelper.setChangeListener(this);
         nextCard();
-    }
-
-    public void onDbChanged() {
-        if (currentCard == null) {
-            nextCard();
-        }
     }
 
     public String getCurrentQuestion() {
@@ -67,5 +62,12 @@ public class DrillSystem {
 
     public void setChangeListener(DrillSystemChangeListener changeListener) {
         this.changeListener = changeListener;
+    }
+
+    @Override
+    public void onDatabaseChange() {
+        if (currentCard == null) {
+            nextCard();
+        }
     }
 }
