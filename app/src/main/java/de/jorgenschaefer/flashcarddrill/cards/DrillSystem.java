@@ -76,6 +76,9 @@ public class DrillSystem implements CardsDbChangeListener {
         if (currentCard == null) {
             nextCard();
         }
+        if (changeListener != null) {
+            changeListener.onDeckSizesChanged();
+        }
     }
 
     public void setCurrentId(int cardId) {
