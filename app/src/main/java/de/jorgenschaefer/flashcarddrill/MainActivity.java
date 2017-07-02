@@ -10,11 +10,15 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.InputStream;
+
 import de.jorgenschaefer.flashcarddrill.cards.DrillSystem;
 import de.jorgenschaefer.flashcarddrill.cards.DrillSystemChangeListener;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, DrillSystemChangeListener {
+    private static final String STATE_DECK = "currentDeck";
+    private static final String STATE_CARDID = "currentCardId";
 
     DrillSystem drill;
     TextView statusText;
@@ -44,8 +48,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new DrillSystem(dbHelper);
         drill.setChangeListener(this);
-        cardText.setText(drill.getCurrentQuestion());
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(STATE_CARDID)) {
+                drill.setCurrentId(savedInstanceState.getInt(STATE_CARDID));
+            }
+            if (savedInstanceState.containsKey(STATE_DECK)) {
+                drill.setCurrentDeck(savedInstanceState.getInt(STATE_DECK));
+            }
+        }
+        displayQuestion();
         updateStatusText();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(STATE_CARDID, drill.getCurrentId());
+        outState.putInt(STATE_DECK, drill.getCurrentDeck());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -73,10 +92,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void displayQuestion() {
-        cardText.setText(drill.getCurrentQuestion());
-        showButton.setVisibility(View.VISIBLE);
-        rightButton.setVisibility(View.GONE);
-        wrongButton.setVisibility(View.GONE);
+        String question = drill.getCurrentQuestion();
+        if (question == null) {
+            cardText.setText("No questions :-(\nLoad them from the menu!");
+            showButton.setVisibility(View.GONE);
+            rightButton.setVisibility(View.GONE);
+            wrongButton.setVisibility(View.GONE);
+        } else {
+            cardText.setText(question);
+            showButton.setVisibility(View.VISIBLE);
+            rightButton.setVisibility(View.GONE);
+            wrongButton.setVisibility(View.GONE);
+        }
     }
 
     private void displayAnswer() {
@@ -95,29 +122,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        View view = findViewById(R.id.card_text);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            View view = findViewById(R.id.card_text);
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-            return true;
+        switch (id) {
+            case R.id.action_load:
+                Snackbar.make(view, "Loading...", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                InputStream cardStream = getResources().openRawResource(R.raw.cards);
+                new CardLoader(dbHelper).execute(cardStream);
+                return true;
+            case R.id.action_settings:
+                Snackbar.make(view, "No settings yet!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                return true;
+
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onCurrentCardChanged() {
-        displayQuestion();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                displayQuestion();
+            }
+        });
     }
 
     @Override
     public void onDeckSizesChanged() {
-        updateStatusText();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateStatusText();
+            }
+        });
     }
 }

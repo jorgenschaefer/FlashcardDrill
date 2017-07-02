@@ -4,8 +4,8 @@
     tools:context="de.jorgenschaefer.flashcarddrill.MainActivity">
 
     <item
-        android:id="@+id/action_refresh"
-        android:title="Refresh"
+        android:id="@+id/action_load"
+        android:title="Load Cards"
         android:orderInCategory="1"
         app:showAsAction="never" />
 

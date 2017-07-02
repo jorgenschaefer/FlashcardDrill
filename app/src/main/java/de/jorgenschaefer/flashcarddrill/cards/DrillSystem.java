@@ -30,6 +30,13 @@ public class DrillSystem implements CardsDbChangeListener {
         return currentCard.getAnswer();
     }
 
+    public Integer getCurrentId() {
+        if (currentCard == null) {
+            return null;
+        }
+        return currentCard.getId();
+    }
+
     public void markAnswerCorrect() {
         dbHelper.addCard(currentDeck + 1, currentCard);
         nextCard();
@@ -69,5 +76,16 @@ public class DrillSystem implements CardsDbChangeListener {
         if (currentCard == null) {
             nextCard();
         }
+    }
+
+    public void setCurrentId(int cardId) {
+        Card card = dbHelper.getCardById(cardId);
+        if (card != null) {
+            currentCard = card;
+        }
+    }
+
+    public void setCurrentDeck(int deck) {
+        currentDeck = deck;
     }
 }
