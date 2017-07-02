@@ -1,20 +1,22 @@
 package de.jorgenschaefer.flashcarddrill.cards;
 
-import de.jorgenschaefer.flashcarddrill.db.CardDbHelper;
+import de.jorgenschaefer.flashcarddrill.db.Card;
+import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
 public class DrillSystem {
-    int NUM_DECKS = 5;
-
-    private int currentDeck = 0;
-    private CardBox box;
+    private CardsDbHelper dbHelper;
     private Card currentCard;
+    private int currentDeck = 0;
 
-    public DrillSystem(CardBoxLoader loader, CardDbHelper dbHelper) {
-        box = new CardBox(NUM_DECKS, dbHelper);
-        if (loader != null) {
-            loader.load(box);
-        }
+    public DrillSystem(CardsDbHelper dbHelper) {
+        this.dbHelper = dbHelper;
         nextCard();
+    }
+
+    public void onDbChanged() {
+        if (currentCard == null) {
+            nextCard();
+        }
     }
 
     public String getCurrentQuestion() {
@@ -32,17 +34,17 @@ public class DrillSystem {
     }
 
     public void markAnswerCorrect() {
-        box.addCard(currentDeck + 1, currentCard);
+        dbHelper.addCard(currentDeck + 1, currentCard);
         nextCard();
     }
 
     public void markAnswerWrong() {
-        box.addCard(0, currentCard);
+        dbHelper.addCard(0, currentCard);
         nextCard();
     }
 
     public int[] getDeckSizes() {
-        return box.getDeckSizes();
+        return dbHelper.getDeckSizes();
     }
 
     public int getCurrentDeck() {
@@ -50,10 +52,10 @@ public class DrillSystem {
     }
 
     private void nextCard() {
-        currentCard = box.getRandomCardFromDeck(currentDeck);
+        currentCard = dbHelper.getRandomCardFromDeck(currentDeck);
         if (currentCard == null) {
-            currentDeck = box.getFirstNonemptyDeck();
-            currentCard = box.getRandomCardFromDeck(currentDeck);
+            currentDeck = dbHelper.getFirstNonemptyDeck();
+            currentCard = dbHelper.getRandomCardFromDeck(currentDeck);
         }
     }
 }

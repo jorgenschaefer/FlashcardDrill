@@ -1,6 +1,5 @@
 package de.jorgenschaefer.flashcarddrill;
 
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,8 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import de.jorgenschaefer.flashcarddrill.cards.DrillSystem;
-import de.jorgenschaefer.flashcarddrill.cards.FakeCardLoader;
-import de.jorgenschaefer.flashcarddrill.db.CardDbHelper;
+import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -23,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button showButton;
     Button rightButton;
     Button wrongButton;
-    CardDbHelper dbHelper;
+    CardsDbHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         cardText = (TextView)findViewById(R.id.card_text);
         statusText = (TextView)findViewById(R.id.status_text);
 
-        dbHelper = new CardDbHelper(getApplicationContext());
-        drill = new DrillSystem(new FakeCardLoader(), dbHelper);
+        dbHelper = new CardsDbHelper(getApplicationContext());
+        drill = new DrillSystem(dbHelper);
         cardText.setText(drill.getCurrentQuestion());
         setStatusText();
     }

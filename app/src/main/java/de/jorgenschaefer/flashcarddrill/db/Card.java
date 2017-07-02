@@ -1,4 +1,4 @@
-package de.jorgenschaefer.flashcarddrill.cards;
+package de.jorgenschaefer.flashcarddrill.db;
 
 public class Card {
     private int id;

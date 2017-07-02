@@ -3,7 +3,7 @@ package de.jorgenschaefer.flashcarddrill;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.jorgenschaefer.flashcarddrill.cards.Card;
+import de.jorgenschaefer.flashcarddrill.db.Card;
 
 import static org.junit.Assert.*;
 
