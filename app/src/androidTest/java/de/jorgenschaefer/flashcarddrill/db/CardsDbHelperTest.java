@@ -32,7 +32,7 @@ public class CardsDbHelperTest {
         dbHelper.addCard(0, card);
 
         assertArrayEquals(dbHelper.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
-        assertEquals(dbHelper.getRandomCardFromDeck(0), card);
+        assertEquals(dbHelper.getRandomCardFromDeck(0).getId(), card.getId());
     }
 
     @Test
@@ -42,7 +42,7 @@ public class CardsDbHelperTest {
         dbHelper.addCard(1, card);
 
         assertArrayEquals(dbHelper.getDeckSizes(), new int[]{0, 1, 0, 0, 0});
-        assertEquals(dbHelper.getRandomCardFromDeck(1), card);
+        assertEquals(dbHelper.getRandomCardFromDeck(1).getId(), card.getId());
     }
 
     @Test
@@ -86,8 +86,8 @@ public class CardsDbHelperTest {
         dbHelper.addCard(0, card1);
         dbHelper.addCard(1, card2);
 
-        assertEquals(dbHelper.getRandomCardFromDeck(0), card1);
-        assertEquals(dbHelper.getRandomCardFromDeck(1), card2);
+        assertEquals(dbHelper.getRandomCardFromDeck(0).getId(), card1.getId());
+        assertEquals(dbHelper.getRandomCardFromDeck(1).getId(), card2.getId());
     }
 
     @Test

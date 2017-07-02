@@ -11,27 +11,15 @@ public class Card {
         this.answer = answer;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getQuestion() {
         return question;
     }
 
     public String getAnswer() {
         return answer;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other)
-            return true;
-        if (other == null)
-            return false;
-        if (other.getClass() != getClass())
-            return false;
-        Card o = (Card)other;
-        return o.getId() == getId();
-    }
-
-    public int getId() {
-        return id;
     }
 }
