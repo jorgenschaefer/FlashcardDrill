@@ -38,7 +38,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                 CardsDbContract.Card.ANSWER
         };
         String selection = CardsDbContract.Card.DECK + " = ?";
-        String[] selectionArgs = { Integer.toString(deck) };
+        String[] selectionArgs = {Integer.toString(deck)};
         Cursor cursor = db.query(
                 CardsDbContract.Card.TABLE_NAME,
                 projection,
@@ -99,7 +99,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                 CardsDbContract.Card.TABLE_NAME,
                 values,
                 CardsDbContract.Card._ID + " = ?",
-                new String[]{ Integer.toString(card.getId()) }
+                new String[]{Integer.toString(card.getId())}
         );
         if (count == 0) {
             values.put(CardsDbContract.Card._ID, card.getId());
@@ -152,7 +152,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                 CardsDbContract.Card.ANSWER
         };
         String selection = CardsDbContract.Card._ID + " = ?";
-        String[] selectionArgs = { Integer.toString(cardId) };
+        String[] selectionArgs = {Integer.toString(cardId)};
         Cursor cursor = db.query(
                 CardsDbContract.Card.TABLE_NAME,
                 projection,
@@ -193,7 +193,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
             );
         } else {
             String where = CardsDbContract.Card._ID + " = ?";
-            String whereArgs[] = { Integer.toString(card.getId()) };
+            String whereArgs[] = {Integer.toString(card.getId())};
             db.update(
                     CardsDbContract.Card.TABLE_NAME,
                     values,
