@@ -6,15 +6,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class CardsDbHelper extends SQLiteOpenHelper {
-    int NUM_DECKS = 5;
+import java.util.ArrayList;
+import java.util.List;
 
-    private String SQL_CREATE_TABLE = "CREATE TABLE " + CardsDbContract.Card.TABLE_NAME + " ( " +
+public class CardsDbHelper extends SQLiteOpenHelper {
+    private final int NUM_DECKS = 5;
+
+    private final String SQL_CREATE_TABLE = "CREATE TABLE " + CardsDbContract.Card.TABLE_NAME + " ( " +
             CardsDbContract.Card._ID + " INTEGER PRIMARY KEY, " +
             CardsDbContract.Card.QUESTION + " TEXT, " +
             CardsDbContract.Card.ANSWER + " TEXT, " +
             CardsDbContract.Card.DECK + " INT) ";
-    private CardsDbChangeListener changeListener;
 
     public CardsDbHelper(Context context) {
         super(context, CardsDbContract.DATABASE_NAME, null, CardsDbContract.DATABASE_VERSION);
@@ -30,8 +32,9 @@ public class CardsDbHelper extends SQLiteOpenHelper {
         // No changes so far
     }
 
-    public Card getRandomCardFromDeck(int deck) {
+    public List<Card> getDeck(int deck) {
         SQLiteDatabase db = getReadableDatabase();
+        List<Card> cardList = new ArrayList<>();
         String[] projection = {
                 CardsDbContract.Card._ID,
                 CardsDbContract.Card.QUESTION,
@@ -46,22 +49,19 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                 selectionArgs,
                 null,
                 null,
-                "RANDOM()",
-                "1"
+                null,
+                null
         );
 
-        Card card;
-        if (cursor.moveToNext()) {
-            card = new Card(
+        while (cursor.moveToNext()) {
+            cardList.add(new Card(
                     cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card._ID)),
                     cursor.getString(cursor.getColumnIndexOrThrow(CardsDbContract.Card.QUESTION)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CardsDbContract.Card.ANSWER))
+                    cursor.getString(cursor.getColumnIndexOrThrow(CardsDbContract.Card.ANSWER)))
             );
-        } else {
-            card = null;
         }
         cursor.close();
-        return card;
+        return cardList;
     }
 
     public int[] getDeckSizes() {
@@ -86,14 +86,28 @@ public class CardsDbHelper extends SQLiteOpenHelper {
             int size = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
             sizes[bucket] = size;
         }
+        cursor.close();
         return sizes;
     }
 
-    public void addCard(int deckNum, Card card) {
-        deckNum = Math.min(deckNum, NUM_DECKS - 1);
+    public void moveCard(Card card, int deck) {
+        SQLiteDatabase db = getWritableDatabase();
+        deck = Math.min(deck, NUM_DECKS - 1);
+        ContentValues values = new ContentValues();
+        values.put(CardsDbContract.Card.DECK, deck);
+        db.update(
+                CardsDbContract.Card.TABLE_NAME,
+                values,
+                CardsDbContract.Card._ID + " = ?",
+                new String[]{Integer.toString(card.getId())}
+        );
+    }
+
+    public void insertOrUpdateCard(Card card) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(CardsDbContract.Card.DECK, deckNum);
+        values.put(CardsDbContract.Card.QUESTION, card.getQuestion());
+        values.put(CardsDbContract.Card.ANSWER, card.getAnswer());
 
         int count = db.update(
                 CardsDbContract.Card.TABLE_NAME,
@@ -103,8 +117,7 @@ public class CardsDbHelper extends SQLiteOpenHelper {
         );
         if (count == 0) {
             values.put(CardsDbContract.Card._ID, card.getId());
-            values.put(CardsDbContract.Card.QUESTION, card.getQuestion());
-            values.put(CardsDbContract.Card.ANSWER, card.getAnswer());
+            values.put(CardsDbContract.Card.DECK, 0);
 
             db.insert(
                     CardsDbContract.Card.TABLE_NAME,
@@ -112,97 +125,14 @@ public class CardsDbHelper extends SQLiteOpenHelper {
                     values
             );
         }
-        if (changeListener != null) {
-            changeListener.onDatabaseChange();
-        }
     }
 
-    public int getFirstNonemptyDeck() {
-        SQLiteDatabase db = getReadableDatabase();
-        String[] projection = {
-                "COUNT(*) AS count",
-                CardsDbContract.Card.DECK
-        };
-        Cursor cursor = db.query(
+    public void clearCards() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(
                 CardsDbContract.Card.TABLE_NAME,
-                projection,
-                null,
-                null,
-                CardsDbContract.Card.DECK,
-                "count > 0",
-                CardsDbContract.Card.DECK + " ASC"
-        );
-        int bucket = 0;
-        if (cursor.moveToNext()) {
-            bucket = cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card.DECK));
-        }
-        cursor.close();
-        return bucket;
-    }
-
-    public void setChangeListener(CardsDbChangeListener changeListener) {
-        this.changeListener = changeListener;
-    }
-
-    public Card getCardById(int cardId) {
-        SQLiteDatabase db = getReadableDatabase();
-        String[] projection = {
-                CardsDbContract.Card._ID,
-                CardsDbContract.Card.QUESTION,
-                CardsDbContract.Card.ANSWER
-        };
-        String selection = CardsDbContract.Card._ID + " = ?";
-        String[] selectionArgs = {Integer.toString(cardId)};
-        Cursor cursor = db.query(
-                CardsDbContract.Card.TABLE_NAME,
-                projection,
-                selection,
-                selectionArgs,
-                null,
                 null,
                 null
         );
-
-        Card card;
-        if (cursor.moveToNext()) {
-            card = new Card(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card._ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CardsDbContract.Card.QUESTION)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(CardsDbContract.Card.ANSWER))
-            );
-        } else {
-            card = null;
-        }
-        cursor.close();
-        return card;
-    }
-
-    public void addOrUpdateCard(Card card) {
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(CardsDbContract.Card.QUESTION, card.getQuestion());
-        values.put(CardsDbContract.Card.ANSWER, card.getAnswer());
-
-        if (getCardById(card.getId()) == null) {
-            values.put(CardsDbContract.Card.DECK, 0);
-            values.put(CardsDbContract.Card._ID, card.getId());
-            db.insert(
-                    CardsDbContract.Card.TABLE_NAME,
-                    null,
-                    values
-            );
-        } else {
-            String where = CardsDbContract.Card._ID + " = ?";
-            String whereArgs[] = {Integer.toString(card.getId())};
-            db.update(
-                    CardsDbContract.Card.TABLE_NAME,
-                    values,
-                    where,
-                    whereArgs
-            );
-        }
-        if (changeListener != null) {
-            changeListener.onDatabaseChange();
-        }
     }
 }

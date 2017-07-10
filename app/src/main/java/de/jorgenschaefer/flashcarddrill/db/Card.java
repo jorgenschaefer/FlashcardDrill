@@ -22,4 +22,16 @@ public class Card {
     public String getAnswer() {
         return answer;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Card other = (Card)obj;
+        return this.id == other.id;
+    }
 }
