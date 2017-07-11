@@ -15,7 +15,6 @@ import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
 public class CardsDbHelperTest {
-    private int NUM_DECKS = 5;
     private CardsDbHelper dbHelper;
 
     @Before

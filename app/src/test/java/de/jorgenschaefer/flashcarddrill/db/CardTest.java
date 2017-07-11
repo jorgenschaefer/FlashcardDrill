@@ -29,4 +29,10 @@ public class CardTest {
     public void shouldHaveAnswer() {
         assertEquals("A", card.getAnswer());
     }
+
+    @Test
+    public void shouldSupportEquality() {
+        assertEquals(new Card(1, "", ""), new Card(1, "foo", "bar"));
+        assertNotEquals(new Card(1, "", ""), new Card(2, "", ""));
+    }
 }

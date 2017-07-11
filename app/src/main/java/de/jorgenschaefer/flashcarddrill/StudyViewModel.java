@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
@@ -28,16 +30,11 @@ public class StudyViewModel extends BaseObservable {
 
     @Bindable
     public String getStatusText() {
-        String statusText = "Current deck: " + currentDeck + " | Decks: ";
+        String statusText = "Current deck: " + (currentDeck + 1) + " | Decks: ";
         for (int size : getDeckSizes()) {
             statusText += Integer.toString(size) + " / ";
         }
         return statusText.substring(0, statusText.length() - 3);
-    }
-
-    @Bindable
-    public int getCurrentDeck() {
-        return currentDeck;
     }
 
     @Bindable
@@ -94,7 +91,9 @@ public class StudyViewModel extends BaseObservable {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                new CardLoader(dbHelper).load(cardStream);
+                for (Card card : loadCards(cardStream)) {
+                    dbHelper.insertOrUpdateCard(card);
+                }
                 return null;
             }
 
@@ -133,7 +132,6 @@ public class StudyViewModel extends BaseObservable {
         if (currentCardList.isEmpty()) {
             currentDeck = nextDeck();
             currentCardList = dbHelper.getDeck(currentDeck);
-            notifyPropertyChanged(BR.currentDeck);
         }
         currentSide = "Q";
         notifyPropertyChanged(BR.currentSide);
@@ -149,5 +147,23 @@ public class StudyViewModel extends BaseObservable {
             }
         }
         return 0;
+    }
+
+    private List<Card> loadCards(InputStream stream) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        List<Card> cards = new ArrayList<>();
+        try {
+            String line;
+            int id = 0;
+            while ((line = reader.readLine()) != null) {
+                String[] row = line.split("\t");
+                id++;
+                String question = row[0];
+                String answer = row[1];
+                cards.add(new Card(id, question, answer));
+            }
+        } catch (IOException e) {
+        }
+        return cards;
     }
 }
