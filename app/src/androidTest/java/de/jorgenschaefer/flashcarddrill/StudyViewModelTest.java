@@ -1,6 +1,7 @@
 package de.jorgenschaefer.flashcarddrill;
 
 import android.databinding.Observable;
+import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -11,6 +12,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import de.jorgenschaefer.flashcarddrill.StudyViewModel;
 import de.jorgenschaefer.flashcarddrill.db.Card;
@@ -90,7 +92,7 @@ public class StudyViewModelTest {
     @Test
     public void getCurrentAnswer() {
         dbHelper.insertOrUpdateCard(new Card(1, "Que?", "Ye!"));
-        assertEquals("Ye?", drill().getCurrentAnswer());
+        assertEquals("Ye!", drill().getCurrentAnswer());
     }
 
     @Test
@@ -102,6 +104,7 @@ public class StudyViewModelTest {
         assertEquals("A", drill.getCurrentSide());
         drill.onFlipCard(null);
         assertEquals(BR.currentSide, observer.getChangedProperties().get(1).intValue());
+        assertPropertyChanged(BR.currentSide);
     }
 
     @Test
@@ -111,6 +114,7 @@ public class StudyViewModelTest {
         // - Q side is up
         // - If the current deck is empty, the next non-empty deck is chosen
         // - Notifies statusText, currentSide, currentQuestion, and currentAnswer
+        assertPropertyChanged(BR.statusText);
     }
 
     @Test
@@ -120,6 +124,7 @@ public class StudyViewModelTest {
         // - Q side is up
         // - If the current deck is empty, the next non-empty deck is chosen
         // - Notifies statusText, currentSide, currentQuestion, and currentAnswer
+        assertPropertyChanged(BR.statusText);
     }
 
     // FIXME: Test this
@@ -142,10 +147,35 @@ public class StudyViewModelTest {
     // FIXME: Test this
     @Test
     public void getStateSetState() {
+        dbHelper.insertOrUpdateCard(new Card(1, "Q1", "A1"));
+        dbHelper.insertOrUpdateCard(new Card(2, "Q2", "A2"));
+        StudyViewModel drill1 = new StudyViewModel(dbHelper);
+        StudyViewModel drill2 = drill();
+        drill1.getCurrentAnswer();
+        drill1.onAnswerCorrect(null);
+        drill1.onAnswerCorrect(null);
+        drill1.onAnswerCorrect(null);
+        drill1.onFlipCard(null);
+        assertArrayEquals(new int[]{0, 1, 1, 0, 0}, drill1.getDeckSizes());
+
+        assertEquals("Current deck: 2", drill1.getStatusText().substring(0, 15));
+        assertEquals("A", drill1.getCurrentSide());
+        String oldAnswer = drill1.getCurrentAnswer();
+
+        drill2.setState(drill1.getState());
+
         // Restores:
         // - currentDeck
+        assertEquals("Current deck: 2", drill2.getStatusText().substring(0, 15));
         // - currentSide
+        assertEquals("A", drill2.getCurrentSide());
         // - currentCardList
+        assertEquals(oldAnswer, drill2.getCurrentAnswer());
+
+        assertPropertyChanged(BR.currentQuestion);
+        assertPropertyChanged(BR.currentAnswer);
+        assertPropertyChanged(BR.currentSide);
+        assertPropertyChanged(BR.statusText);
     }
 
     private class TestObserver extends Observable.OnPropertyChangedCallback {
@@ -161,106 +191,9 @@ public class StudyViewModelTest {
         }
     }
 
-/*
-    private Card card;
-    private CardsDbHelper dbHelper;
-    private StudyViewModel drill;
-
-    @Before
-    public void setUp() {
-        card = new Card(0, "Q", "A");
-        dbHelper = new CardsDbHelper(InstrumentationRegistry.getTargetContext());
-        drill = new StudyViewModel(dbHelper);
+    private void assertPropertyChanged(int prop) {
+        // prop 0 is sent if "all" properties changed
+        assertTrue(observer.getChangedProperties().contains(prop)
+                   || observer.getChangedProperties().contains(0));
     }
-
-    @After
-    public void tearDown() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(CardsDbContract.DATABASE_NAME);
-    }
-
-    private void addTestCard() {
-        dbHelper.insertOrUpdateCard(card);
-    }
-
-    @Test
-    public void shouldReturnCurrentQuestion() {
-        addTestCard();
-        assertEquals(drill.getCurrentQuestion(), card.getQuestion());
-    }
-
-    @Test
-    public void shouldReturnCurrentQuestionAsNull() {
-        assertNull(drill.getCurrentQuestion());
-    }
-
-    @Test
-    public void shouldReturnCurrentAnswer() {
-        addTestCard();
-        assertEquals(drill.getCurrentAnswer(), card.getAnswer());
-    }
-
-    @Test
-    public void shouldReturnCurrentAnswerAsNull() {
-        assertNull(drill.getCurrentAnswer());
-    }
-
-    @Test
-    public void shouldMarkAnswerCorrectly() {
-        addTestCard();
-        assertArrayEquals(drill.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
-        drill.markAnswerCorrect();
-        assertArrayEquals(drill.getDeckSizes(), new int[]{0, 1, 0, 0, 0});
-    }
-
-    @Test
-    public void shouldMarkAnswerWrong() {
-        addTestCard();
-        drill.markAnswerCorrect();
-        assertArrayEquals(drill.getDeckSizes(), new int[]{0, 1, 0, 0, 0});
-        drill.markAnswerWrong();
-        assertArrayEquals(drill.getDeckSizes(), new int[]{1, 0, 0, 0, 0});
-    }
-
-    @Test
-    public void shouldAdvanceWhenSlotIsEmpty() {
-        addTestCard();
-        assertEquals(drill.getCurrentDeck(), 0);
-        drill.markAnswerCorrect();
-        assertEquals(drill.getCurrentDeck(), 1);
-    }
-
-    @Test
-    public void shouldRestartWhenSlotIsEmptyAndPriorSlotsAreFull() {
-        addTestCard();
-        drill.markAnswerCorrect();
-        assertEquals(drill.getCurrentDeck(), 1);
-        drill.markAnswerWrong();
-        assertEquals(drill.getCurrentDeck(), 0);
-    }
-
-    @Test
-    public void shouldCallChangeListener() {
-        TestChangeListener listener = new TestChangeListener();
-        addTestCard();
-        drill.setChangeListener(listener);
-        drill.markAnswerCorrect();
-        assertTrue(listener.cardChanged);
-        assertTrue(listener.deckSizesChanged);
-    }
-
-    class TestChangeListener implements DrillSystemChangeListener {
-        boolean cardChanged = false;
-        boolean deckSizesChanged = false;
-
-        @Override
-        public void onCurrentCardChanged() {
-            cardChanged = true;
-        }
-
-        @Override
-        public void onDeckSizesChanged() {
-            deckSizesChanged = true;
-        }
-    }
-*/
 }

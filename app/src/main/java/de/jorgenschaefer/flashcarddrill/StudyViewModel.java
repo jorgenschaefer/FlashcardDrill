@@ -18,10 +18,13 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
 public class StudyViewModel extends BaseObservable {
+    private static final String STATE_CURRENT_DECK = "currentDeck";
+    private static final String STATE_CURRENT_SIDE = "currentSide";
+    private static final String STATE_CURRENT_CARDLIST = "currentCardList";
     private CardsDbHelper dbHelper;
     private int currentDeck = 0;
     private String currentSide = "Q";
-    private List<Card> currentCardList = new ArrayList<>();
+    private ArrayList<Card> currentCardList = new ArrayList<>();
 
     public StudyViewModel(CardsDbHelper dbHelper) {
         this.dbHelper = dbHelper;
@@ -117,12 +120,19 @@ public class StudyViewModel extends BaseObservable {
     }
 
     // TODO: Implement me!
-    public void setState(Bundle bundle) {
+    public void setState(Bundle state) {
+        currentDeck = state.getInt(STATE_CURRENT_DECK);
+        currentSide = state.getString(STATE_CURRENT_SIDE);
+        currentCardList = state.getParcelableArrayList(STATE_CURRENT_CARDLIST);
+        notifyChange();
     }
 
-    // TODO: Implement me!
     public Bundle getState() {
-        return null;
+        Bundle state = new Bundle();
+        state.putInt(STATE_CURRENT_DECK, currentDeck);
+        state.putString(STATE_CURRENT_SIDE, currentSide);
+        state.putParcelableArrayList(STATE_CURRENT_CARDLIST, currentCardList);
+        return state;
     }
 
     private void nextCard() {
@@ -131,7 +141,10 @@ public class StudyViewModel extends BaseObservable {
         }
         if (currentCardList.isEmpty()) {
             currentDeck = nextDeck();
-            currentCardList = dbHelper.getDeck(currentDeck);
+            currentCardList = new ArrayList<>();
+            for (Card card : dbHelper.getDeck(currentDeck)) {
+                currentCardList.add(card);
+            }
         }
         currentSide = "Q";
         notifyPropertyChanged(BR.currentSide);
