@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
@@ -119,7 +120,6 @@ public class StudyViewModel extends BaseObservable {
         notifyChange();
     }
 
-    // TODO: Implement me!
     public void setState(Bundle state) {
         currentDeck = state.getInt(STATE_CURRENT_DECK);
         currentSide = state.getString(STATE_CURRENT_SIDE);
@@ -145,6 +145,7 @@ public class StudyViewModel extends BaseObservable {
             for (Card card : dbHelper.getDeck(currentDeck)) {
                 currentCardList.add(card);
             }
+            Collections.shuffle(currentCardList);
         }
         currentSide = "Q";
         notifyPropertyChanged(BR.currentSide);
@@ -154,7 +155,7 @@ public class StudyViewModel extends BaseObservable {
 
     private int nextDeck() {
         int[] deckSizes = dbHelper.getDeckSizes();
-        for (int i = currentDeck; i < deckSizes.length; i++) {
+        for (int i = 0; i < deckSizes.length; i++) {
             if (deckSizes[i] > 0)  {
                 return i;
             }

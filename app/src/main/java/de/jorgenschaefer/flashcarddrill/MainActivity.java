@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Snackbar.make(view, "No settings yet!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 return true;
-
         }
         return super.onOptionsItemSelected(item);
     }
