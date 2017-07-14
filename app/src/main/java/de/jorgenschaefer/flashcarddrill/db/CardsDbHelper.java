@@ -9,7 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CardsDbHelper extends SQLiteOpenHelper {
+import de.jorgenschaefer.flashcarddrill.drill.CardRepository;
+
+public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
     private final int NUM_DECKS = 5;
 
     private final String SQL_CREATE_TABLE = "CREATE TABLE " + CardsDbContract.Card.TABLE_NAME + " ( " +

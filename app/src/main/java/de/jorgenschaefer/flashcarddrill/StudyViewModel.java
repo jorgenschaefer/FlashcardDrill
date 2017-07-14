@@ -5,6 +5,7 @@ import android.databinding.Bindable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 
 import java.io.BufferedReader;
@@ -17,75 +18,65 @@ import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
+import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
 public class StudyViewModel extends BaseObservable {
     private static final String STATE_CURRENT_DECK = "currentDeck";
     private static final String STATE_CURRENT_SIDE = "currentSide";
     private static final String STATE_CURRENT_CARDLIST = "currentCardList";
-    private CardsDbHelper dbHelper;
-    private int currentDeck = 0;
-    private String currentSide = "Q";
-    private ArrayList<Card> currentCardList = new ArrayList<>();
+    private Drill drill;
 
-    public StudyViewModel(CardsDbHelper dbHelper) {
-        this.dbHelper = dbHelper;
-        nextCard();
+    public StudyViewModel(Drill drill) {
+        this.drill = drill;
+    }
+
+    @Bindable
+    public int getCardVisibility() {
+        return drill.hasCards() ? View.VISIBLE : View.GONE;
+    }
+
+    @Bindable
+    public int getNoCardVisibility() {
+        return drill.hasCards() ? View.GONE : View.VISIBLE;
     }
 
     @Bindable
     public String getStatusText() {
-        String statusText = "Current deck: " + (currentDeck + 1) + " | Decks: ";
-        for (int size : getDeckSizes()) {
+        String statusText = "Current deck: " + (drill.getCurrentDeck() + 1) + " | Decks: ";
+        for (int size : drill.getDeckSizes()) {
             statusText += Integer.toString(size) + " / ";
         }
         return statusText.substring(0, statusText.length() - 3);
     }
 
     @Bindable
-    public int[] getDeckSizes() {
-        return dbHelper.getDeckSizes();
-    }
-
-    @Bindable
-    public String getCurrentSide() {
-        return currentSide;
-    }
-
-    @Bindable
-    public String getCurrentQuestion() {
-        if (currentCardList.isEmpty()) {
-            return null;
-        }
-        return currentCardList.get(0).getQuestion();
-    }
-
-    @Bindable
-    public String getCurrentAnswer() {
-        if (currentCardList.isEmpty()) {
-            return null;
-        }
-        return currentCardList.get(0).getAnswer();
-    }
-
-    public void onFlipCard(View view) {
-        if (currentSide.equals("Q")) {
-            currentSide = "A";
+    public String getCurrentText() {
+        if (!drill.hasCards()) {
+            return "";
+        } else if (drill.getCurrentSide() == Drill.Side.QUESTION) {
+            return drill.getCurrentQuestion();
         } else {
-            currentSide = "Q";
+            return drill.getCurrentAnswer();
         }
-        notifyPropertyChanged(BR.currentSide);
+    }
+
+    public void onFlipCard() {
+        drill.onFlipCard();
+        notifyPropertyChanged(BR.currentText);
     }
 
     public void onAnswerCorrect(View view) {
-        dbHelper.moveCard(currentCardList.get(0), currentDeck + 1);
-        notifyPropertyChanged(BR.statusText);
-        nextCard();
+        drill.onAnswerCorrect();
+        notifyChange();
+        Snackbar.make(view, "Correct! :-)", Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
     }
 
     public void onAnswerIncorrect(View view) {
-        dbHelper.moveCard(currentCardList.get(0), 0);
-        notifyPropertyChanged(BR.statusText);
-        nextCard();
+        drill.onAnswerIncorrect();
+        notifyChange();
+        Snackbar.make(view, "Incorrect :-(", Snackbar.LENGTH_SHORT)
+                .setAction("Action", null).show();
     }
 
     public void onLoadCards(View view) {
@@ -95,72 +86,29 @@ public class StudyViewModel extends BaseObservable {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                for (Card card : loadCards(cardStream)) {
-                    dbHelper.insertOrUpdateCard(card);
-                }
+                drill.onLoadCards(loadCards(cardStream));
                 return null;
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                if (currentCardList.isEmpty()) {
-                    nextCard();
-                }
                 StudyViewModel.this.notifyChange();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
     }
 
     public void onClearCards(View view) {
-        dbHelper.clearCards();
-        currentDeck = 0;
-        currentSide = "Q";
-        currentCardList = new ArrayList<>();
-
+        drill.onClearCards();
         notifyChange();
     }
 
     public void setState(Bundle state) {
-        currentDeck = state.getInt(STATE_CURRENT_DECK);
-        currentSide = state.getString(STATE_CURRENT_SIDE);
-        currentCardList = state.getParcelableArrayList(STATE_CURRENT_CARDLIST);
+        drill.setState(state);
         notifyChange();
     }
 
     public Bundle getState() {
-        Bundle state = new Bundle();
-        state.putInt(STATE_CURRENT_DECK, currentDeck);
-        state.putString(STATE_CURRENT_SIDE, currentSide);
-        state.putParcelableArrayList(STATE_CURRENT_CARDLIST, currentCardList);
-        return state;
-    }
-
-    private void nextCard() {
-        if (!currentCardList.isEmpty()) {
-            currentCardList.remove(0);
-        }
-        if (currentCardList.isEmpty()) {
-            currentDeck = nextDeck();
-            currentCardList = new ArrayList<>();
-            for (Card card : dbHelper.getDeck(currentDeck)) {
-                currentCardList.add(card);
-            }
-            Collections.shuffle(currentCardList);
-        }
-        currentSide = "Q";
-        notifyPropertyChanged(BR.currentSide);
-        notifyPropertyChanged(BR.currentQuestion);
-        notifyPropertyChanged(BR.currentAnswer);
-    }
-
-    private int nextDeck() {
-        int[] deckSizes = dbHelper.getDeckSizes();
-        for (int i = 0; i < deckSizes.length; i++) {
-            if (deckSizes[i] > 0)  {
-                return i;
-            }
-        }
-        return 0;
+        return drill.getState();
     }
 
     private List<Card> loadCards(InputStream stream) {

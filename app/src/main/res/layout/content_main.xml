@@ -2,8 +2,7 @@
 <layout xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
-        <import type="android.view.View"/>
-        <variable name="drill" type="de.jorgenschaefer.flashcarddrill.StudyViewModel"/>
+        <variable name="studyView" type="de.jorgenschaefer.flashcarddrill.StudyViewModel"/>
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -22,12 +21,12 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:visibility="@{drill.currentQuestion != null ? View.VISIBLE : View.GONE}">
+            android:visibility="@{studyView.cardVisibility}">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{drill.statusText}"/>
+                android:text="@{studyView.statusText}"/>
 
             <TextView
                 android:layout_weight="1"
@@ -35,36 +34,7 @@
                 android:layout_height="0dp"
                 android:gravity="center"
                 android:textSize="12pt"
-                android:text="@{drill.currentSide.equals(`Q`) ? drill.currentQuestion : drill.currentAnswer}" />
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <Button
-                    android:visibility="@{drill.currentSide.equals(`Q`) ? View.VISIBLE : View.GONE}"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:onClick="@{drill::onFlipCard}"
-                    android:text="Show" />
-                <Button
-                    android:visibility="@{drill.currentSide.equals(`A`) ? View.VISIBLE : View.GONE}"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:onClick="@{drill::onAnswerCorrect}"
-                    android:text="Right" />
-                <Button
-                    android:visibility="@{drill.currentSide.equals(`A`) ? View.VISIBLE : View.GONE}"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:onClick="@{drill::onAnswerIncorrect}"
-                    android:text="Wrong" />
-
-            </LinearLayout>
+                android:text="@{studyView.currentText}" />
         </LinearLayout>
 
         <TextView
@@ -79,6 +49,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteY="8dp"
             tools:layout_editor_absoluteX="8dp"
-            android:visibility="@{drill.currentQuestion == null ? View.VISIBLE : View.GONE}" />
+            android:visibility="@{studyView.noCardVisibility}" />
     </android.support.constraint.ConstraintLayout>
 </layout>

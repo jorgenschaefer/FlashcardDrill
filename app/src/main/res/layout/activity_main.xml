@@ -3,7 +3,7 @@
     xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="drill" type="de.jorgenschaefer.flashcarddrill.StudyViewModel"/>
+        <variable name="studyView" type="de.jorgenschaefer.flashcarddrill.StudyViewModel"/>
     </data>
 
     <android.support.design.widget.CoordinatorLayout
@@ -28,7 +28,7 @@
         </android.support.design.widget.AppBarLayout>
 
         <include layout="@layout/content_main"
-            bind:drill="@{drill}"/>
+            bind:studyView="@{studyView}"/>
 
     </android.support.design.widget.CoordinatorLayout>
 
