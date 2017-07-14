@@ -12,16 +12,15 @@ import android.view.View;
 import de.jorgenschaefer.flashcarddrill.databinding.ActivityMainBinding;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
     private static final String STATE_STUDYVIEWMODEL = "studyViewModel";
 
     StudyViewModel drill;
-    CardsDbHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new CardsDbHelper(getApplicationContext());
+        CardsDbHelper dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new StudyViewModel(dbHelper);
         ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setDrill(drill);
@@ -38,10 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBundle(STATE_STUDYVIEWMODEL, drill.getState());
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onClick(View v) {
     }
 
     @Override
