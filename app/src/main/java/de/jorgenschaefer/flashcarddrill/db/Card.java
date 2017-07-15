@@ -4,9 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Card implements Parcelable {
-    private int id;
-    private String question;
-    private String answer;
+    private final int id;
+    private final String question;
+    private final String answer;
 
     public Card(int id, String question, String answer) {
         this.id = id;

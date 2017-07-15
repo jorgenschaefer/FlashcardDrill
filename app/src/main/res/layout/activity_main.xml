@@ -1,35 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="de.jorgenschaefer.flashcarddrill.MainActivity">
 
-    <data>
-        <variable name="studyView" type="de.jorgenschaefer.flashcarddrill.StudyViewModel"/>
-    </data>
-
-    <android.support.design.widget.CoordinatorLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="de.jorgenschaefer.flashcarddrill.MainActivity">
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.design.widget.AppBarLayout
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:id="@+id/status_text"/>
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+        <TextView
+            android:id="@+id/no_cards"
+            android:visibility="visible"
+            android:gravity="center"
+            android:textSize="12pt"
+            android:text="No cards, please load them from the menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <FrameLayout
+            android:id="@+id/card"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/card_back"
+                android:gravity="center"
+                android:textSize="12pt"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                android:layout_height="match_parent"
+                android:background="@drawable/card"
+                android:padding="5dp"/>
 
-        </android.support.design.widget.AppBarLayout>
+            <TextView
+                android:id="@+id/card_front"
+                android:gravity="center"
+                android:textSize="12pt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/card"
+                android:padding="5dp"/>
 
-        <include layout="@layout/content_main"
-            bind:studyView="@{studyView}"/>
+        </FrameLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
-
-</layout>
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

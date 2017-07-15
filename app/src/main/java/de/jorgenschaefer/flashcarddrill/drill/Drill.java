@@ -11,7 +11,7 @@ public class Drill {
     private static final String STATE_CURRENT_DECK = "currentDeck";
     private static final String STATE_CURRENT_SIDE = "currentSide";
     private static final String STATE_CURRENT_CARDLIST = "currentCardList";
-    private CardRepository repository;
+    private final CardRepository repository;
 
     private int currentDeck = 0;
     private Side currentSide = Side.QUESTION;
@@ -123,4 +123,21 @@ public class Drill {
         }
         return 0;
     }
+
+    public String getCurrentFrontText() {
+        if (currentSide == Side.QUESTION) {
+            return getCurrentQuestion();
+        } else {
+            return getCurrentAnswer();
+        }
+    }
+
+    public String getCurrentBackText() {
+        if (currentSide == Side.QUESTION) {
+            return getCurrentAnswer();
+        } else {
+            return getCurrentQuestion();
+        }
+    }
+
 }
