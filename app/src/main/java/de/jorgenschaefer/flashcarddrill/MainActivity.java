@@ -1,25 +1,20 @@
 package de.jorgenschaefer.flashcarddrill;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -33,22 +28,19 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
-public class MainActivity extends AppCompatActivity implements GestureDetector.OnGestureListener {
+public class MainActivity extends AppCompatActivity {
     private static final String STATE_STUDYVIEWMODEL = "studyViewModel";
 
-    private GestureDetectorCompat detector;
     private Drill drill;
-    private View noCards;
-    private ViewGroup card;
-    private TextView cardFront;
-    private TextView cardBack;
     private TextView statusText;
-    private boolean animationRunning;
+    private View noCards;
+    private RecyclerView card;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        detector = new GestureDetectorCompat(this, this);
 
         CardsDbHelper dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new Drill(dbHelper);
@@ -60,11 +52,17 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
         statusText = (TextView) findViewById(R.id.status_text);
         noCards = findViewById(R.id.no_cards);
-        card = (ViewGroup) findViewById(R.id.card);
-        cardFront = (TextView) findViewById(R.id.card_front);
-        cardBack = (TextView) findViewById(R.id.card_back);
-        cardFront.setCameraDistance(R.integer.camera_distance);
-        cardBack.setCameraDistance(R.integer.camera_distance);
+        card = (RecyclerView) findViewById(R.id.card);
+
+        card.setHasFixedSize(true);
+
+        layoutManager = new LinearLayoutManager(this);
+        card.setLayoutManager(layoutManager);
+        adapter = new DrillAdapter(drill);
+        card.setAdapter(adapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallbackItemTouchHelper);
+        itemTouchHelper.attachToRecyclerView(card);
 
         render();
 
@@ -92,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
         switch (id) {
             case R.id.action_load:
+                Snackbar.make(view, "Loading cards", Snackbar.LENGTH_SHORT)
+                        .setAction("Action", null).show();
                 loadCards();
                 return true;
             case R.id.action_clear:
@@ -106,123 +106,16 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        detector.onTouchEvent(event);
-        return super.onTouchEvent(event);
-    }
-
-    private final String DEBUG_TAG = "main";
-
-    @Override
-    public boolean onDown(MotionEvent e) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent e) {
-        Log.d(DEBUG_TAG, "onShowPress: " + e.toString());
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        if (noCards.getVisibility() != View.GONE) {
-            return false;
-        }
-        if (animationRunning) {
-            return false;
-        }
-        animationRunning = true;
-
-        drill.onFlipCard();
-
-        AnimatorSet flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.flip_out);
-        flipOut.setTarget(cardFront);
-        AnimatorSet flipIn = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.flip_in);
-        flipIn.setTarget(cardBack);
-
-        AnimatorSet flip = new AnimatorSet();
-        flip.playTogether(flipOut, flipIn);
-        flip.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                animationRunning = false;
-                render();
-            }
-        });
-        flip.start();
-
-        return true;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent e) {
-        Log.d(DEBUG_TAG, "onLongPress: " + e);
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        if (noCards.getVisibility() != View.GONE) {
-            return false;
-        }
-        if (animationRunning) {
-            return false;
-        }
-        animationRunning = true;
-
-        float distanceX = e2.getX() - e1.getX();
-        int endX;
-        if (distanceX < 0) {
-            drill.onAnswerIncorrect();
-            endX = -1000;
-        } else {
-            drill.onAnswerCorrect();
-            endX = 1000;
-        }
-        Resources res = getResources();
-        cardBack.setText(drill.getCurrentFrontText());
-        ObjectAnimator slide = ObjectAnimator.ofFloat(cardFront, "x", 0, endX)
-                .setDuration(res.getInteger(R.integer.flip_duration));
-
-        slide.setInterpolator(new AccelerateDecelerateInterpolator());
-        slide.addListener(new AnimatorListenerAdapter() {
-                              @Override
-                              public void onAnimationEnd(Animator animation) {
-                                  super.onAnimationEnd(animation);
-                                  animationRunning = false;
-                                  render();
-                                  super.onAnimationEnd(animation);
-                              }
-
-                          }
-        );
-        slide.start();
-        return true;
-    }
-
     private void render() {
         if (!drill.hasCards()) {
             noCards.setVisibility(View.VISIBLE);
             statusText.setVisibility(View.GONE);
             card.setVisibility(View.GONE);
         } else {
+            statusText.setText(getStatusText());
             noCards.setVisibility(View.GONE);
             statusText.setVisibility(View.VISIBLE);
             card.setVisibility(View.VISIBLE);
-            cardFront.setAlpha(1.0f);
-            cardFront.setRotationY(0);
-            cardFront.setX(0);
-            cardFront.setText(drill.getCurrentFrontText());
-            cardBack.setAlpha(1.0f);
-            cardBack.setRotationY(0);
-            cardBack.setX(0);
-            cardBack.setText(drill.getCurrentBackText());
-            statusText.setText(getStatusText());
         }
     }
 
@@ -235,9 +128,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     }
 
     private void loadCards() {
-        View view = findViewById(R.id.toolbar);
-        Snackbar.make(view, "Loading cards", Snackbar.LENGTH_SHORT)
-                .setAction("Action", null).show();
         final InputStream cardStream = getResources().openRawResource(R.raw.cards);
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -250,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             protected void onPostExecute(Void aVoid) {
                 render();
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private List<Card> cardsFromStream(InputStream stream) {
@@ -270,4 +160,73 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         }
         return cards;
     }
+
+    private class DrillAdapter extends RecyclerView.Adapter<DrillAdapter.ViewHolder> {
+        private Drill drill;
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public TextView front;
+            public TextView back;
+
+            public ViewHolder(CardView v) {
+                super(v);
+                front = (TextView) v.findViewById(R.id.card_front);
+                back = (TextView) v.findViewById(R.id.card_back);
+            }
+        }
+
+        public DrillAdapter(Drill drill) {
+            this.drill = drill;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            CardView v = (CardView) LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.card, parent, false);
+            final TextView front = (TextView) v.findViewById(R.id.card_front);
+            final TextView back = (TextView) v.findViewById(R.id.card_back);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (front.getAlpha() < 0.5) {
+                        front.setAlpha(1.0f);
+                        back.setAlpha(0.0f);
+                    } else {
+                        front.setAlpha(0.0f);
+                        back.setAlpha(1.0f);
+                    }
+                }
+            });
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            holder.front.setText(drill.getCurrentQuestion());
+            holder.back.setText(drill.getCurrentAnswer());
+        }
+
+        @Override
+        public int getItemCount() {
+            return 1;
+        }
+    }
+
+    ItemTouchHelper.SimpleCallback simpleCallbackItemTouchHelper = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT){
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            if (direction == ItemTouchHelper.LEFT) {
+                drill.onAnswerIncorrect();
+            } else {
+                drill.onAnswerCorrect();
+            }
+            adapter.notifyDataSetChanged();
+            render();
+        }
+    };
 }

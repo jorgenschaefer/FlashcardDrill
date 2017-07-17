@@ -25,11 +25,13 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="5dp">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:id="@+id/status_text"/>
 
         <TextView
@@ -41,31 +43,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <FrameLayout
-            android:id="@+id/card"
-            android:visibility="gone"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/card_back"
-                android:gravity="center"
-                android:textSize="12pt"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/card"
+                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/card"
-                android:padding="5dp"/>
+                android:layout_height="wrap_content"/>
 
-            <TextView
-                android:id="@+id/card_front"
-                android:gravity="center"
-                android:textSize="12pt"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/card"
-                android:padding="5dp"/>
-
-        </FrameLayout>
-
+        </LinearLayout>
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
