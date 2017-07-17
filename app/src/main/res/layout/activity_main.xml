@@ -28,11 +28,10 @@
         android:layout_height="match_parent"
         android:padding="5dp">
 
-        <TextView
+        <de.jorgenschaefer.flashcarddrill.views.StatusBarView
+            android:id="@+id/status_row"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:id="@+id/status_text"/>
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/no_cards"

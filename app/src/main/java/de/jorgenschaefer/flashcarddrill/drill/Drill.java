@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
@@ -29,6 +30,19 @@ public class Drill {
 
     public int getCurrentDeck() {
         return currentDeck;
+    }
+
+    public void setCurrentDeck(int i) {
+        List<Card> newCards = repository.getDeck(i);
+        if (newCards.isEmpty()) {
+            return;
+        }
+        currentDeck = i;
+        currentCardList = new ArrayList<>();
+        for (Card card : newCards) {
+            currentCardList.add(card);
+        }
+        Collections.shuffle(currentCardList);
     }
 
     public int[] getDeckSizes() {
@@ -104,7 +118,7 @@ public class Drill {
             currentCardList.remove(0);
         }
         if (currentCardList.isEmpty()) {
-            currentDeck = nextDeck();
+            currentDeck = nextDeck(0);
             currentCardList = new ArrayList<>();
             for (Card card : repository.getDeck(currentDeck)) {
                 currentCardList.add(card);
@@ -114,9 +128,9 @@ public class Drill {
         currentSide = Side.QUESTION;
     }
 
-    private int nextDeck() {
+    private int nextDeck(int start) {
         int[] deckSizes = repository.getDeckSizes();
-        for (int i = 0; i < deckSizes.length; i++) {
+        for (int i = start; i < deckSizes.length; i++) {
             if (deckSizes[i] > 0)  {
                 return i;
             }

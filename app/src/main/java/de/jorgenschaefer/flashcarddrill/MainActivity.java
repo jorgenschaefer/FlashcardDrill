@@ -1,7 +1,9 @@
 package de.jorgenschaefer.flashcarddrill;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -10,29 +12,34 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
+import de.jorgenschaefer.flashcarddrill.views.StatusBarView;
 
 public class MainActivity extends AppCompatActivity {
     private static final String STATE_STUDYVIEWMODEL = "studyViewModel";
 
     private Drill drill;
-    private TextView statusText;
+    private StatusBarView statusRow;
     private View noCards;
     private RecyclerView card;
     private RecyclerView.Adapter adapter;
@@ -50,7 +57,14 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        statusText = (TextView) findViewById(R.id.status_text);
+        statusRow = (StatusBarView) findViewById(R.id.status_row);
+        statusRow.setDrill(drill);
+        statusRow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adapter.notifyDataSetChanged();
+            }
+        });
         noCards = findViewById(R.id.no_cards);
         card = (RecyclerView) findViewById(R.id.card);
 
@@ -109,22 +123,14 @@ public class MainActivity extends AppCompatActivity {
     private void render() {
         if (!drill.hasCards()) {
             noCards.setVisibility(View.VISIBLE);
-            statusText.setVisibility(View.GONE);
+            statusRow.setVisibility(View.GONE);
             card.setVisibility(View.GONE);
         } else {
-            statusText.setText(getStatusText());
+            statusRow.update();
             noCards.setVisibility(View.GONE);
-            statusText.setVisibility(View.VISIBLE);
+            statusRow.setVisibility(View.VISIBLE);
             card.setVisibility(View.VISIBLE);
         }
-    }
-
-    private String getStatusText() {
-        String statusText = "Current deck: " + (drill.getCurrentDeck() + 1) + " | Decks: ";
-        for (int size : drill.getDeckSizes()) {
-            statusText += Integer.toString(size) + " / ";
-        }
-        return statusText.substring(0, statusText.length() - 3);
     }
 
     private void loadCards() {
