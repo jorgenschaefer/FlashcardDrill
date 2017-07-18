@@ -210,6 +210,8 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             holder.front.setText(drill.getCurrentQuestion());
             holder.back.setText(drill.getCurrentAnswer());
+            holder.front.setAlpha(1.0f);
+            holder.back.setAlpha(0.0f);
         }
 
         @Override
