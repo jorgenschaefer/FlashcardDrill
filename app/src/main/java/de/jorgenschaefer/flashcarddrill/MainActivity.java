@@ -1,38 +1,27 @@
 package de.jorgenschaefer.flashcarddrill;
 
-import android.graphics.Color;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
+import de.jorgenschaefer.flashcarddrill.views.FlashCardView;
 import de.jorgenschaefer.flashcarddrill.views.StatusBarView;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,14 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     private Drill drill;
     private StatusBarView statusRow;
+    private FlashCardView card;
     private View noCards;
-    private RecyclerView card;
-    private RecyclerView.Adapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
 
         CardsDbHelper dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new Drill(dbHelper);
@@ -55,33 +44,45 @@ public class MainActivity extends AppCompatActivity {
             drill.setState(savedInstanceState.getBundle(STATE_STUDYVIEWMODEL));
         }
 
-        setContentView(R.layout.activity_main);
-
         statusRow = (StatusBarView) findViewById(R.id.status_row);
         statusRow.setDrill(drill);
-        statusRow.setOnClickListener(new View.OnClickListener() {
+
+        card = (FlashCardView) findViewById(R.id.card);
+        card.setDrill(drill);
+
+        noCards = findViewById(R.id.no_cards);
+
+        drill.setOnChangeListener(new Runnable() {
             @Override
-            public void onClick(View v) {
-                adapter.notifyDataSetChanged();
+            public void run() {
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.this.update();
+                    }
+                });
             }
         });
-        noCards = findViewById(R.id.no_cards);
-        card = (RecyclerView) findViewById(R.id.card);
-
-        card.setHasFixedSize(true);
-
-        layoutManager = new LinearLayoutManager(this);
-        card.setLayoutManager(layoutManager);
-        adapter = new DrillAdapter(drill);
-        card.setAdapter(adapter);
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallbackItemTouchHelper);
-        itemTouchHelper.attachToRecyclerView(card);
-
-        render();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        update();
+    }
+
+    private void update() {
+        if (drill.hasCards()) {
+            noCards.setVisibility(View.GONE);
+            statusRow.setVisibility(View.VISIBLE);
+            card.setVisibility(View.VISIBLE);
+            statusRow.notifyDataSetChanged();
+            card.notifyDataSetChanged();
+        } else {
+            statusRow.setVisibility(View.GONE);
+            card.setVisibility(View.GONE);
+            noCards.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
@@ -92,12 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        if (!BuildConfig.DEBUG) {
-            MenuItem item = menu.findItem(R.id.action_clear);
-            item.setVisible(false);
-        }
         return true;
     }
 
@@ -113,30 +109,22 @@ public class MainActivity extends AppCompatActivity {
                 loadCards();
                 return true;
             case R.id.action_clear:
-                drill.onClearCards();
-                render();
-                return true;
-            case R.id.action_settings:
-                Snackbar.make(view, "No settings yet!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                new AlertDialog.Builder(this)
+                        .setTitle("Remove all cards")
+                        .setMessage("Do you really want to remove all cards? This will lose all your progress!")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                drill.onClearCards();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void render() {
-        if (!drill.hasCards()) {
-            noCards.setVisibility(View.VISIBLE);
-            statusRow.setVisibility(View.GONE);
-            card.setVisibility(View.GONE);
-        } else {
-            statusRow.update();
-            noCards.setVisibility(View.GONE);
-            statusRow.setVisibility(View.VISIBLE);
-            card.setVisibility(View.VISIBLE);
-        }
-    }
-
+    // FIXME! Temp code
     private void loadCards() {
         final InputStream cardStream = getResources().openRawResource(R.raw.cards);
         new AsyncTask<Void, Void, Void>() {
@@ -144,11 +132,6 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... params) {
                 drill.onLoadCards(cardsFromStream(cardStream));
                 return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                render();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -166,79 +149,8 @@ public class MainActivity extends AppCompatActivity {
                 String answer = row[1];
                 cards.add(new Card(id, question, answer));
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         return cards;
     }
-
-    private class DrillAdapter extends RecyclerView.Adapter<DrillAdapter.ViewHolder> {
-        private Drill drill;
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView front;
-            public TextView back;
-
-            public ViewHolder(CardView v) {
-                super(v);
-                front = (TextView) v.findViewById(R.id.card_front);
-                back = (TextView) v.findViewById(R.id.card_back);
-            }
-        }
-
-        public DrillAdapter(Drill drill) {
-            this.drill = drill;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            CardView v = (CardView) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.card, parent, false);
-            final TextView front = (TextView) v.findViewById(R.id.card_front);
-            final TextView back = (TextView) v.findViewById(R.id.card_back);
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (front.getAlpha() < 0.5) {
-                        front.setAlpha(1.0f);
-                        back.setAlpha(0.0f);
-                    } else {
-                        front.setAlpha(0.0f);
-                        back.setAlpha(1.0f);
-                    }
-                }
-            });
-            return new ViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.front.setText(drill.getCurrentQuestion());
-            holder.back.setText(drill.getCurrentAnswer());
-            holder.front.setAlpha(1.0f);
-            holder.back.setAlpha(0.0f);
-        }
-
-        @Override
-        public int getItemCount() {
-            return 1;
-        }
-    }
-
-    ItemTouchHelper.SimpleCallback simpleCallbackItemTouchHelper = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT){
-        @Override
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            if (direction == ItemTouchHelper.LEFT) {
-                drill.onAnswerIncorrect();
-            } else {
-                drill.onAnswerCorrect();
-            }
-            adapter.notifyDataSetChanged();
-            render();
-        }
-    };
 }

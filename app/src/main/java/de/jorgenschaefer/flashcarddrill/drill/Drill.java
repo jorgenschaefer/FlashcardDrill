@@ -10,22 +10,26 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public class Drill {
     private static final String STATE_CURRENT_DECK = "currentDeck";
-    private static final String STATE_CURRENT_SIDE = "currentSide";
     private static final String STATE_CURRENT_CARDLIST = "currentCardList";
     private final CardRepository repository;
 
     private int currentDeck = 0;
-    private Side currentSide = Side.QUESTION;
     private ArrayList<Card> currentCardList = new ArrayList<>();
-
-    public enum Side {
-        QUESTION,
-        ANSWER
-    }
+    private Runnable onChangeListener;
 
     public Drill(CardRepository repository) {
         this.repository = repository;
         nextCard();
+    }
+
+    public void setOnChangeListener(Runnable onChangeListener) {
+        this.onChangeListener = onChangeListener;
+    }
+
+    private void notifyChange() {
+        if (onChangeListener != null) {
+            onChangeListener.run();
+        }
     }
 
     public int getCurrentDeck() {
@@ -43,6 +47,7 @@ public class Drill {
             currentCardList.add(card);
         }
         Collections.shuffle(currentCardList);
+        notifyChange();
     }
 
     public int[] getDeckSizes() {
@@ -53,24 +58,12 @@ public class Drill {
         return !currentCardList.isEmpty();
     }
 
-    public Side getCurrentSide() {
-        return currentSide;
-    }
-
     public String getCurrentQuestion() {
         return currentCardList.get(0).getQuestion();
     }
 
     public String getCurrentAnswer() {
         return currentCardList.get(0).getAnswer();
-    }
-
-    public void onFlipCard() {
-        if (currentSide == Side.QUESTION) {
-            currentSide = Side.ANSWER;
-        } else {
-            currentSide = Side.QUESTION;
-        }
     }
 
     public void onAnswerCorrect() {
@@ -95,20 +88,19 @@ public class Drill {
     public void onClearCards() {
         repository.clearCards();
         currentDeck = 0;
-        currentSide = Side.QUESTION;
         currentCardList = new ArrayList<>();
+        notifyChange();
     }
 
     public void setState(Bundle state) {
         currentDeck = state.getInt(STATE_CURRENT_DECK);
-        currentSide = (Side)state.getSerializable(STATE_CURRENT_SIDE);
         currentCardList = state.getParcelableArrayList(STATE_CURRENT_CARDLIST);
+        notifyChange();
     }
 
     public Bundle getState() {
         Bundle state = new Bundle();
         state.putInt(STATE_CURRENT_DECK, currentDeck);
-        state.putSerializable(STATE_CURRENT_SIDE, currentSide);
         state.putParcelableArrayList(STATE_CURRENT_CARDLIST, currentCardList);
         return state;
     }
@@ -125,33 +117,16 @@ public class Drill {
             }
             Collections.shuffle(currentCardList);
         }
-        currentSide = Side.QUESTION;
+        notifyChange();
     }
 
     private int nextDeck(int start) {
         int[] deckSizes = repository.getDeckSizes();
         for (int i = start; i < deckSizes.length; i++) {
-            if (deckSizes[i] > 0)  {
+            if (deckSizes[i] > 0) {
                 return i;
             }
         }
         return 0;
     }
-
-    public String getCurrentFrontText() {
-        if (currentSide == Side.QUESTION) {
-            return getCurrentQuestion();
-        } else {
-            return getCurrentAnswer();
-        }
-    }
-
-    public String getCurrentBackText() {
-        if (currentSide == Side.QUESTION) {
-            return getCurrentAnswer();
-        } else {
-            return getCurrentQuestion();
-        }
-    }
-
 }
