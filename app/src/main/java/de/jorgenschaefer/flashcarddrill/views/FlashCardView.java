@@ -79,12 +79,12 @@ public class FlashCardView extends RecyclerView {
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (front.getVisibility() == View.VISIBLE) {
-                        front.setVisibility(View.INVISIBLE);
-                        back.setVisibility(View.VISIBLE);
-                    } else {
+                    if (front.getVisibility() != View.VISIBLE) {
                         front.setVisibility(View.VISIBLE);
                         back.setVisibility(View.INVISIBLE);
+                    } else {
+                        front.setVisibility(View.INVISIBLE);
+                        back.setVisibility(View.VISIBLE);
                     }
                 }
             });
