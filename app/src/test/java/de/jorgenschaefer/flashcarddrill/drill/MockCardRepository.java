@@ -1,5 +1,6 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class MockCardRepository implements CardRepository {
 
     @Override
     public List<Card> getDeck(int currentDeck) {
-        return decks.get(currentDeck);
+        ArrayList<Card> cards = new ArrayList<>();
+        cards.addAll(decks.get(currentDeck));
+        return cards;
     }
 }

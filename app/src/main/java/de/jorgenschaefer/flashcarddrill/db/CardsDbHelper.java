@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.drill.CardRepository;
@@ -18,7 +19,12 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
             CardsDbContract.Card._ID + " INTEGER PRIMARY KEY, " +
             CardsDbContract.Card.QUESTION + " TEXT, " +
             CardsDbContract.Card.ANSWER + " TEXT, " +
-            CardsDbContract.Card.DECK + " INT) ";
+            CardsDbContract.Card.DECK + " INT, " +
+            CardsDbContract.Card.UPDATED_AT + " INT " +
+            ")";
+
+    private final String SQL_UPDATE_V1_TO_V2 = "ALTER TABLE " + CardsDbContract.Card.TABLE_NAME +
+            " ADD COLUMN " + CardsDbContract.Card.UPDATED_AT + " INT";
 
     public CardsDbHelper(Context context) {
         super(context, CardsDbContract.DATABASE_NAME, null, CardsDbContract.DATABASE_VERSION);
@@ -31,7 +37,9 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // No changes so far
+        if (oldVersion == 1 && newVersion > 1) {
+            db.execSQL(SQL_UPDATE_V1_TO_V2);
+        }
     }
 
     public List<Card> getDeck(int deck) {
@@ -51,7 +59,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                 selectionArgs,
                 null,
                 null,
-                null,
+                CardsDbContract.Card.UPDATED_AT,
                 null
         );
 
@@ -97,6 +105,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         deck = Math.min(deck, NUM_DECKS - 1);
         ContentValues values = new ContentValues();
         values.put(CardsDbContract.Card.DECK, deck);
+        values.put(CardsDbContract.Card.UPDATED_AT, new Date().getTime());
         db.update(
                 CardsDbContract.Card.TABLE_NAME,
                 values,

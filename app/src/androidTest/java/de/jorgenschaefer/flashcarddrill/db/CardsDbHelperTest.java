@@ -43,6 +43,21 @@ public class CardsDbHelperTest {
     }
 
     @Test
+    public void getDeckSortsByAge() {
+        Card card1 = new Card(1, "", "");
+        Card card2 = new Card(2, "", "");
+        Card card3 = new Card(3, "", "");
+        dbHelper.insertOrUpdateCard(card1);
+        dbHelper.insertOrUpdateCard(card2);
+        dbHelper.insertOrUpdateCard(card3);
+        dbHelper.moveCard(card2, 1);
+        dbHelper.moveCard(card1, 1);
+        List<Card> cards = dbHelper.getDeck(1);
+        assertEquals(cards.get(0), card2);
+        assertEquals(cards.get(1), card1);
+    }
+
+    @Test
     public void getDeckSizes() {
         Card card1 = new Card(1, "", "");
         Card card2 = new Card(2, "", "");

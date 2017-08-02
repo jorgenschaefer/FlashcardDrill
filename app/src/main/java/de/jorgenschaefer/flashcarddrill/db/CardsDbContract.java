@@ -3,7 +3,7 @@ package de.jorgenschaefer.flashcarddrill.db;
 import android.provider.BaseColumns;
 
 public final class CardsDbContract {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "Cards.db";
 
     private CardsDbContract() {}
@@ -13,5 +13,6 @@ public final class CardsDbContract {
         public static final String QUESTION = "question";
         public static final String ANSWER = "answer";
         public static final String DECK = "deck";
+        public static final String UPDATED_AT = "updated_at";
     }
 }

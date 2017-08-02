@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import dalvik.annotation.TestTargetClass;
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 import static junit.framework.Assert.assertTrue;
@@ -80,9 +81,9 @@ public class DrillTest {
         getDrill().onAnswerCorrect();
 
         assertTrue(changeListenerDidRun);
-        assertEquals(getDrill().getCurrentDeck(), 0);
+        assertEquals(0, getDrill().getCurrentDeck());
         getDrill().setCurrentDeck(1);
-        assertEquals(getDrill().getCurrentQuestion(), currentQuestion);
+        assertEquals(currentQuestion, getDrill().getCurrentQuestion());
     }
 
     @Test
@@ -125,9 +126,11 @@ public class DrillTest {
         Card c1 = new Card(1, "Q1", "");
         List<Card> cards = new ArrayList<>();
         cards.add(c1);
+        assertFalse(getDrill().hasCards());
 
         getDrill().onLoadCards(cards);
 
+        assertTrue(getDrill().hasCards());
         assertTrue(changeListenerDidRun);
     }
 

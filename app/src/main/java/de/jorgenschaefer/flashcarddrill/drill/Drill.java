@@ -3,7 +3,6 @@ package de.jorgenschaefer.flashcarddrill.drill;
 import android.os.Bundle;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.Card;
@@ -14,7 +13,7 @@ public class Drill {
     private final CardRepository repository;
 
     private int currentDeck = 0;
-    private ArrayList<Card> currentCardList = new ArrayList<>();
+    private List<Card> currentCardList = new ArrayList<>();
     private Runnable onChangeListener;
 
     public Drill(CardRepository repository) {
@@ -42,11 +41,7 @@ public class Drill {
             return;
         }
         currentDeck = i;
-        currentCardList = new ArrayList<>();
-        for (Card card : newCards) {
-            currentCardList.add(card);
-        }
-        Collections.shuffle(currentCardList);
+        currentCardList = newCards;
         notifyChange();
     }
 
@@ -101,7 +96,9 @@ public class Drill {
     public Bundle getState() {
         Bundle state = new Bundle();
         state.putInt(STATE_CURRENT_DECK, currentDeck);
-        state.putParcelableArrayList(STATE_CURRENT_CARDLIST, currentCardList);
+        ArrayList<Card> cards = new ArrayList<>();
+        cards.addAll(currentCardList);
+        state.putParcelableArrayList(STATE_CURRENT_CARDLIST, cards);
         return state;
     }
 
@@ -111,11 +108,7 @@ public class Drill {
         }
         if (currentCardList.isEmpty()) {
             currentDeck = nextDeck(0);
-            currentCardList = new ArrayList<>();
-            for (Card card : repository.getDeck(currentDeck)) {
-                currentCardList.add(card);
-            }
-            Collections.shuffle(currentCardList);
+            currentCardList = repository.getDeck(currentDeck);
         }
         notifyChange();
     }
