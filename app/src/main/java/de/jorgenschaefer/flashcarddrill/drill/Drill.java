@@ -75,9 +75,7 @@ public class Drill {
         for (Card card : cards) {
             repository.insertOrUpdateCard(card);
         }
-        if (currentCardList.isEmpty()) {
-            nextCard();
-        }
+        reload();
     }
 
     public void onClearCards() {
@@ -121,5 +119,12 @@ public class Drill {
             }
         }
         return 0;
+    }
+
+    public void reload() {
+        if (currentCardList.isEmpty()) {
+            nextCard();
+            notifyChange();
+        }
     }
 }

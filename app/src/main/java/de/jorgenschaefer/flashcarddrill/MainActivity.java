@@ -1,9 +1,8 @@
 package de.jorgenschaefer.flashcarddrill;
 
 import android.content.DialogInterface;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,14 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import de.jorgenschaefer.flashcarddrill.db.Card;
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 import de.jorgenschaefer.flashcarddrill.views.FlashCardView;
@@ -70,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
         update();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        drill.reload();
+    }
+
     private void update() {
         if (drill.hasCards()) {
             noCards.setVisibility(View.GONE);
@@ -100,13 +97,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        View view = findViewById(R.id.toolbar);
 
         switch (id) {
             case R.id.action_load:
-                Snackbar.make(view, "Loading cards", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-                loadCards();
+                Intent intent = new Intent(this, LoadCardsActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.action_clear:
                 new AlertDialog.Builder(this)
@@ -122,35 +117,5 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    // FIXME! Temp code
-    private void loadCards() {
-        final InputStream cardStream = getResources().openRawResource(R.raw.cards);
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                drill.onLoadCards(cardsFromStream(cardStream));
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    private List<Card> cardsFromStream(InputStream stream) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        List<Card> cards = new ArrayList<>();
-        try {
-            String line;
-            int id = 0;
-            while ((line = reader.readLine()) != null) {
-                String[] row = line.split("\t");
-                id++;
-                String question = row[0];
-                String answer = row[1];
-                cards.add(new Card(id, question, answer));
-            }
-        } catch (IOException ignored) {
-        }
-        return cards;
     }
 }
