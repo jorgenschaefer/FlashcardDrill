@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,6 +96,11 @@ public class FlashCardView extends RecyclerView {
         public void onBindViewHolder(ViewHolder holder, int position) {
             holder.front.setText(drill.getCurrentQuestion());
             holder.back.setText(drill.getCurrentAnswer());
+            if (drill.getCurrentAnswer().contains("\n")) {
+                holder.back.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
+            } else {
+                holder.back.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+            }
             holder.front.setVisibility(View.VISIBLE);
             holder.back.setVisibility(View.INVISIBLE);
         }
