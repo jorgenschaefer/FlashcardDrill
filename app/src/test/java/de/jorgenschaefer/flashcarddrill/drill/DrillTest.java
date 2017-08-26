@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import dalvik.annotation.TestTargetClass;
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 import static junit.framework.Assert.assertTrue;
@@ -44,7 +43,12 @@ public class DrillTest {
         repository.insertOrUpdateCard(new Card(1, "Q", "A"));
 
         assertEquals(getDrill().getCurrentDeck(), 0);
-        assertArrayEquals(getDrill().getDeckSizes(), new int[]{1, 0, 0, 0, 0});
+        List<DeckInfo> infos = getDrill().getDeckSizes();
+        assertEquals(infos.get(0).getSize(), 1);
+        assertEquals(infos.get(1).getSize(), 0);
+        assertEquals(infos.get(2).getSize(), 0);
+        assertEquals(infos.get(3).getSize(), 0);
+        assertEquals(infos.get(4).getSize(), 0);
         assertTrue(getDrill().hasCards());
         assertEquals(getDrill().getCurrentQuestion(), "Q");
         assertEquals(getDrill().getCurrentAnswer(), "A");
@@ -53,7 +57,12 @@ public class DrillTest {
     @Test
     public void testForEmptyDrill() {
         assertEquals(getDrill().getCurrentDeck(), 0);
-        assertArrayEquals(getDrill().getDeckSizes(), new int[]{0, 0, 0, 0, 0});
+        List<DeckInfo> infos = getDrill().getDeckSizes();
+        assertEquals(infos.get(0).getSize(), 0);
+        assertEquals(infos.get(1).getSize(), 0);
+        assertEquals(infos.get(2).getSize(), 0);
+        assertEquals(infos.get(3).getSize(), 0);
+        assertEquals(infos.get(4).getSize(), 0);
         assertFalse(getDrill().hasCards());
     }
 

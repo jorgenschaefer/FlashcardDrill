@@ -45,8 +45,8 @@ public class Drill {
         notifyChange();
     }
 
-    public int[] getDeckSizes() {
-        return repository.getDeckSizes();
+    public List<DeckInfo> getDeckSizes() {
+        return repository.getDeckInfos();
     }
 
     public boolean hasCards() {
@@ -112,9 +112,9 @@ public class Drill {
     }
 
     private int nextDeck(int start) {
-        int[] deckSizes = repository.getDeckSizes();
-        for (int i = start; i < deckSizes.length; i++) {
-            if (deckSizes[i] > 0) {
+        List<DeckInfo> infos = repository.getDeckInfos();
+        for (int i = start; i < infos.size(); i++) {
+            if (infos.get(i).getSize() > 0) {
                 return i;
             }
         }

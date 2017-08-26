@@ -1,6 +1,5 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +14,12 @@ public class MockCardRepository implements CardRepository {
     }
 
     @Override
-    public int[] getDeckSizes() {
-        int[] deckSizes = new int[decks.size()];
-        for (int i = 0; i < deckSizes.length; i++) {
-            deckSizes[i] = decks.get(i).size();
+    public List<DeckInfo> getDeckInfos() {
+        List<DeckInfo> infos = new ArrayList<>();
+        for (List<Card> deck : decks) {
+            infos.add(new DeckInfo(deck.size(), 0));
         }
-        return deckSizes;
+        return infos;
     }
 
     @Override

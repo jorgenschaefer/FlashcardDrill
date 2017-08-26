@@ -5,7 +5,7 @@ import java.util.List;
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public interface CardRepository {
-    int[] getDeckSizes();
+    List<DeckInfo> getDeckInfos();
 
     void moveCard(Card card, int deck);
 

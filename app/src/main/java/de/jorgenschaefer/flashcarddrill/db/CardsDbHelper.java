@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.drill.CardRepository;
+import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
 
 public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
     private final int NUM_DECKS = 5;
@@ -74,7 +75,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         return cardList;
     }
 
-    public int[] getDeckSizes() {
+    public List<DeckInfo> getDeckInfos() {
         SQLiteDatabase db = getReadableDatabase();
 
         String[] projection = {
@@ -90,14 +91,17 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                 null,
                 null
         );
-        int[] sizes = new int[NUM_DECKS];
+        List<DeckInfo> infos = new ArrayList<>();
+        for (int i = 0; i < NUM_DECKS; i++) {
+            infos.add(new DeckInfo(0, 0));
+        }
         while (cursor.moveToNext()) {
             int bucket = cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card.DECK));
             int size = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
-            sizes[bucket] = size;
+            infos.set(bucket, new DeckInfo(size, 0));
         }
         cursor.close();
-        return sizes;
+        return infos;
     }
 
     public void moveCard(Card card, int deck) {

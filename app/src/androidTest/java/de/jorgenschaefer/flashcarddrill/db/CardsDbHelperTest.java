@@ -66,7 +66,7 @@ public class CardsDbHelperTest {
         dbHelper.insertOrUpdateCard(card2);
         dbHelper.insertOrUpdateCard(card3);
         dbHelper.moveCard(card2, 1);
-        assertArrayEquals(dbHelper.getDeckSizes(), new int[]{2, 1, 0, 0, 0});
+        assertArrayEquals(dbHelper.getDeckInfos(), new int[]{2, 1, 0, 0, 0});
     }
 
     @Test
@@ -105,6 +105,6 @@ public class CardsDbHelperTest {
 
         dbHelper.clearCards();
 
-        assertArrayEquals(dbHelper.getDeckSizes(), new int[]{0, 0, 0, 0, 0});
+        assertArrayEquals(dbHelper.getDeckInfos(), new int[]{0, 0, 0, 0, 0});
     }
 }

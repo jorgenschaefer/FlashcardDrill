@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.List;
+
+import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
 public class StatusBarView extends LinearLayout {
@@ -21,7 +24,7 @@ public class StatusBarView extends LinearLayout {
 
     public void setDrill(Drill drill) {
         this.drill = drill;
-        decks = new TextView[drill.getDeckSizes().length];
+        decks = new TextView[drill.getDeckSizes().size()];
         for (int i = 0; i < decks.length; i++) {
             decks[i] = new TextView(this.getContext());
             decks[i].setTextSize(TypedValue.COMPLEX_UNIT_PT, 12);
@@ -52,9 +55,10 @@ public class StatusBarView extends LinearLayout {
     }
 
     public void notifyDataSetChanged() {
-        int sizes[] = drill.getDeckSizes();
-        for (int i = 0; i < sizes.length; i++) {
-            decks[i].setText(String.format("%d", sizes[i]));
+        List<DeckInfo> infos = drill.getDeckSizes();
+        for (int i = 0; i < infos.size(); i++) {
+            DeckInfo info = infos.get(i);
+            decks[i].setText(String.format("%d", info.getSize()));
             if (i == drill.getCurrentDeck()) {
                 decks[i].setBackgroundColor(Color.RED);
             } else {
