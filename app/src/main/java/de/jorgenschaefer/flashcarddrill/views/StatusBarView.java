@@ -2,6 +2,8 @@ package de.jorgenschaefer.flashcarddrill.views;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -9,8 +11,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Date;
 import java.util.List;
 
+import de.jorgenschaefer.flashcarddrill.R;
 import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
@@ -59,12 +63,47 @@ public class StatusBarView extends LinearLayout {
         for (int i = 0; i < infos.size(); i++) {
             DeckInfo info = infos.get(i);
             decks[i].setText(String.format("%d", info.getSize()));
-            if (i == drill.getCurrentDeck()) {
-                decks[i].setBackgroundColor(Color.RED);
-            } else {
-                decks[i].setBackgroundColor(Color.WHITE);
-            }
+            decks[i].setBackground(getBackground(i, info.getOldest()));
         }
     }
 
+    private Drawable getBackground(int deck, long oldest) {
+        boolean current = deck == drill.getCurrentDeck();
+        boolean outdated = isOutdated(deck, oldest);
+
+        int resource;
+
+        if (current && outdated) {
+            resource = R.drawable.status_current_outdated;
+        } else if (current && !outdated) {
+            resource = R.drawable.status_current_notoutdated;
+        } else if (!current && outdated) {
+            resource = R.drawable.status_notcurrent_outdated;
+        } else {
+            resource = R.drawable.status_notcurrent_notoutdated;
+        }
+        return ResourcesCompat.getDrawable(getResources(), resource, null);
+    }
+
+    private boolean isOutdated(int deck, long oldest) {
+        long days = (new Date().getTime() - oldest) / 1000 / 60 / 60 / 24;
+
+        if (oldest == 0) {
+            return false;
+        }
+        switch (deck) {
+            case 0:
+                return days > 1;
+            case 1:
+                return days > 3;
+            case 2:
+                return days > 7;
+            case 3:
+                return days > 14;
+            case 4:
+                return days > 28;
+            default:
+                return false;
+        }
+    }
 }

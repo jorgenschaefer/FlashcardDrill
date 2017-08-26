@@ -80,6 +80,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
 
         String[] projection = {
                 "COUNT(*) AS count",
+                "MIN(" + CardsDbContract.Card.UPDATED_AT + ") AS oldest",
                 CardsDbContract.Card.DECK
         };
         Cursor cursor = db.query(
@@ -98,7 +99,8 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         while (cursor.moveToNext()) {
             int bucket = cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card.DECK));
             int size = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
-            infos.set(bucket, new DeckInfo(size, 0));
+            long oldest = cursor.getLong(cursor.getColumnIndexOrThrow("oldest"));
+            infos.set(bucket, new DeckInfo(size, oldest));
         }
         cursor.close();
         return infos;
