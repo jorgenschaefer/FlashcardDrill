@@ -3,8 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="status_current">#7F7F00</color>
-    <color name="status_notcurrent">#FFFFFF</color>
-    <color name="status_outdated">#FF0000</color>
-    <color name="status_notoutdated">#FFFFFF</color>
+    <color name="status_current">@color/colorPrimaryDark</color>
+    <color name="status_notcurrent">@android:color/white</color>
+    <color name="status_outdated">@color/colorAccent</color>
+    <color name="status_notoutdated">@android:color/primary_text_dark</color>
 </resources>
