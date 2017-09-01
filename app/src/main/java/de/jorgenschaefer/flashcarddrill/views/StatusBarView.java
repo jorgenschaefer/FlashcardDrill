@@ -86,22 +86,23 @@ public class StatusBarView extends LinearLayout {
     }
 
     private boolean isOutdated(int deck, long oldest) {
-        long days = (new Date().getTime() - oldest) / 1000 / 60 / 60 / 24;
+        long day = 1000 * 60 * 60 * 24;
+        long age = new Date().getTime() - oldest;
 
         if (oldest == 0) {
             return false;
         }
         switch (deck) {
             case 0:
-                return days > 1;
+                return age > 1 * day;
             case 1:
-                return days > 3;
+                return age > 3 * day;
             case 2:
-                return days > 7;
+                return age > 7 * day;
             case 3:
-                return days > 14;
+                return age > 14 * day;
             case 4:
-                return days > 28;
+                return age > 28 * day;
             default:
                 return false;
         }
