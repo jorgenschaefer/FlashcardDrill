@@ -10,7 +10,6 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class DrillTest {
