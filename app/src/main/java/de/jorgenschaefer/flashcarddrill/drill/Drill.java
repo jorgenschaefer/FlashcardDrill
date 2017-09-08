@@ -9,7 +9,6 @@ import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public class Drill {
     private static final String STATE_CURRENT_DECK = "currentDeck";
-    private static final String STATE_CURRENT_CARDLIST = "currentCardList";
     private final CardRepository repository;
 
     private int currentDeck = 0;
@@ -87,16 +86,13 @@ public class Drill {
 
     public void setState(Bundle state) {
         currentDeck = state.getInt(STATE_CURRENT_DECK);
-        currentCardList = state.getParcelableArrayList(STATE_CURRENT_CARDLIST);
+        currentCardList = repository.getDeck(currentDeck);
         notifyChange();
     }
 
     public Bundle getState() {
         Bundle state = new Bundle();
         state.putInt(STATE_CURRENT_DECK, currentDeck);
-        ArrayList<Card> cards = new ArrayList<>();
-        cards.addAll(currentCardList);
-        state.putParcelableArrayList(STATE_CURRENT_CARDLIST, cards);
         return state;
     }
 
