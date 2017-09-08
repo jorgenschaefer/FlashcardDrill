@@ -10,7 +10,11 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -66,7 +70,13 @@ public class CardsDbHelperTest {
         dbHelper.insertOrUpdateCard(card2);
         dbHelper.insertOrUpdateCard(card3);
         dbHelper.moveCard(card2, 1);
-        assertArrayEquals(dbHelper.getDeckInfos(), new int[]{2, 1, 0, 0, 0});
+
+        List<DeckInfo> infos = dbHelper.getDeckInfos();
+        assertEquals(2, infos.get(0).getSize());
+        assertEquals(1, infos.get(1).getSize());
+        assertEquals(0, infos.get(2).getSize());
+        assertEquals(0, infos.get(3).getSize());
+        assertEquals(0, infos.get(4).getSize());
     }
 
     @Test
@@ -105,6 +115,11 @@ public class CardsDbHelperTest {
 
         dbHelper.clearCards();
 
-        assertArrayEquals(dbHelper.getDeckInfos(), new int[]{0, 0, 0, 0, 0});
+        List<DeckInfo> infos = dbHelper.getDeckInfos();
+        assertEquals(0, infos.get(0).getSize());
+        assertEquals(0, infos.get(1).getSize());
+        assertEquals(0, infos.get(2).getSize());
+        assertEquals(0, infos.get(3).getSize());
+        assertEquals(0, infos.get(4).getSize());
     }
 }
