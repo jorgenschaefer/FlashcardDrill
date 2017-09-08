@@ -135,6 +135,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         if (count == 0) {
             values.put(CardsDbContract.Card._ID, card.getId());
             values.put(CardsDbContract.Card.DECK, 0);
+            values.put(CardsDbContract.Card.UPDATED_AT, 0);
 
             db.insert(
                     CardsDbContract.Card.TABLE_NAME,
