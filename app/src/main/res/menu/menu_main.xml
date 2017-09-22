@@ -4,15 +4,20 @@
     tools:context="de.jorgenschaefer.flashcarddrill.MainActivity">
 
     <item
+        android:id="@+id/action_info"
+        android:title="Deck Information"
+        android:orderInCategory="1"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_load"
         android:title="Load Cards"
-        android:orderInCategory="1"
-        android:icon="@drawable/ic_refresh"
+        android:orderInCategory="2"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_clear"
         android:title="Clear Cards"
-        android:orderInCategory="2"
+        android:orderInCategory="3"
         app:showAsAction="never" />
 </menu>

@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.drill.CardRepository;
 import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
@@ -185,5 +187,49 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                 null,
                 null
         );
+    }
+
+    public List<DeckInfo> getDeckInfoList() {
+        List<DeckInfo> infoList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String[] projection = { "MAX(" + CardsDbContract.Card.DECK + ")" };
+        Cursor cursor = db.query(CardsDbContract.Card.TABLE_NAME, projection, null, null, null, null, null);
+        if (!cursor.moveToNext()) {
+            return infoList;
+        }
+        int maxDeck = cursor.getInt(0);
+        for (int i = 0; i <= maxDeck; i++) {
+            int total = 0, due = 0;
+            projection = new String[]{"COUNT(*)", CardsDbContract.Card.DECK};
+            cursor = db.query(
+                    CardsDbContract.Card.TABLE_NAME,
+                    projection,
+                    CardsDbContract.Card.DECK + " = ?",
+                    new String[]{ Integer.toString(i) },
+                    CardsDbContract.Card.DECK,
+                    null,
+                    CardsDbContract.Card.DECK);
+            if (cursor.moveToNext()) {
+                total = cursor.getInt(0);
+            }
+            String selection = CardsDbContract.Card.DUE_AT + " <= ? AND " + CardsDbContract.Card.DECK + " = ?";
+            String[] selectionArgs = new String[]{
+                    Long.toString(new Date().getTime()),
+                    Integer.toString(i)
+            };
+            cursor = db.query(
+                    CardsDbContract.Card.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    CardsDbContract.Card.DECK,
+                    null,
+                    CardsDbContract.Card.DECK);
+            if (cursor.moveToNext()) {
+                due = cursor.getInt(0);
+            }
+            infoList.add(new DeckInfo(total, due));
+        }
+        return infoList;
     }
 }

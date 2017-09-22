@@ -7,7 +7,6 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import de.jorgenschaefer.flashcarddrill.drill.DeckInfo;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
 public class StatusBarView extends LinearLayout {

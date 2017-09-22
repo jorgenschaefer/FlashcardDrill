@@ -100,9 +100,13 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.action_info:
+                Intent deckInfo = new Intent(this, DeckInfoActivity.class);
+                startActivity(deckInfo);
+                return true;
             case R.id.action_load:
-                Intent intent = new Intent(this, LoadCardsActivity.class);
-                startActivity(intent);
+                Intent loadCards = new Intent(this, LoadCardsActivity.class);
+                startActivity(loadCards);
                 return true;
             case R.id.action_clear:
                 new AlertDialog.Builder(this)
