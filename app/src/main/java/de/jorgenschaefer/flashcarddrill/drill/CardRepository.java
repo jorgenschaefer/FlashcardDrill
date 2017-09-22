@@ -1,17 +1,15 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
-import java.util.List;
-
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public interface CardRepository {
-    List<DeckInfo> getDeckInfos();
+    DeckInfo getDeckInfo();
 
-    void moveCard(Card card, int deck);
+    void moveCard(Card card);
 
     void insertOrUpdateCard(Card card);
 
     void clearCards();
 
-    List<Card> getDeck(int currentDeck);
+    Card getNextCard();
 }

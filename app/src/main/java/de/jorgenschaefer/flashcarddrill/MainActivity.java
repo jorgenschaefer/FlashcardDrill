@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private StatusBarView statusRow;
     private FlashCardView card;
     private View noCards;
+    private View noDueCards;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
         CardsDbHelper dbHelper = new CardsDbHelper(getApplicationContext());
         drill = new Drill(dbHelper);
-        if (savedInstanceState != null) {
-            drill.setState(savedInstanceState.getBundle(STATE_STUDYVIEWMODEL));
-        }
 
         statusRow = (StatusBarView) findViewById(R.id.status_row);
         statusRow.setDrill(drill);
@@ -42,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         card.setDrill(drill);
 
         noCards = findViewById(R.id.no_cards);
+        noDueCards = findViewById(R.id.no_due_cards);
 
         drill.setOnChangeListener(new Runnable() {
             @Override
@@ -69,24 +68,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void update() {
-        if (drill.hasCards()) {
+        if (drill.hasDueCards()) {
             noCards.setVisibility(View.GONE);
+            noDueCards.setVisibility(View.GONE);
             statusRow.setVisibility(View.VISIBLE);
             card.setVisibility(View.VISIBLE);
             statusRow.notifyDataSetChanged();
             card.notifyDataSetChanged();
+        } else if (drill.hasCards()) {
+            noCards.setVisibility(View.GONE);
+            noDueCards.setVisibility(View.VISIBLE);
+            statusRow.setVisibility(View.VISIBLE);
+            card.setVisibility(View.GONE);
+            statusRow.notifyDataSetChanged();
         } else {
+            noCards.setVisibility(View.VISIBLE);
+            noDueCards.setVisibility(View.GONE);
             statusRow.setVisibility(View.GONE);
             card.setVisibility(View.GONE);
-            noCards.setVisibility(View.VISIBLE);
         }
-
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBundle(STATE_STUDYVIEWMODEL, drill.getState());
-        super.onSaveInstanceState(outState);
     }
 
     @Override

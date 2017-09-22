@@ -48,7 +48,7 @@ public class DrillTest {
         assertEquals(infos.get(2).getSize(), 0);
         assertEquals(infos.get(3).getSize(), 0);
         assertEquals(infos.get(4).getSize(), 0);
-        assertTrue(getDrill().hasCards());
+        assertTrue(getDrill().hasDueCards());
         assertEquals(getDrill().getCurrentQuestion(), "Q");
         assertEquals(getDrill().getCurrentAnswer(), "A");
     }
@@ -62,7 +62,7 @@ public class DrillTest {
         assertEquals(infos.get(2).getSize(), 0);
         assertEquals(infos.get(3).getSize(), 0);
         assertEquals(infos.get(4).getSize(), 0);
-        assertFalse(getDrill().hasCards());
+        assertFalse(getDrill().hasDueCards());
     }
 
     @Test
@@ -134,11 +134,11 @@ public class DrillTest {
         Card c1 = new Card(1, "Q1", "");
         List<Card> cards = new ArrayList<>();
         cards.add(c1);
-        assertFalse(getDrill().hasCards());
+        assertFalse(getDrill().hasDueCards());
 
         getDrill().onLoadCards(cards);
 
-        assertTrue(getDrill().hasCards());
+        assertTrue(getDrill().hasDueCards());
         assertTrue(changeListenerDidRun);
     }
 
@@ -149,6 +149,6 @@ public class DrillTest {
 
         getDrill().onClearCards();
 
-        assertFalse(getDrill().hasCards());
+        assertFalse(getDrill().hasDueCards());
     }
 }

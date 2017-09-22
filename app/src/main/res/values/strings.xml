@@ -2,4 +2,5 @@
     <string name="app_name">FlashcardDrill</string>
     <string name="action_settings">Settings</string>
     <string name="no_cards_message">No cards, please load them from the menu</string>
+    <string name="no_due_cards_message">No due cards, relax and take a break</string>
 </resources>

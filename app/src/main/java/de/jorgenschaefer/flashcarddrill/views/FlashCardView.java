@@ -107,7 +107,7 @@ public class FlashCardView extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            if (drill.hasCards()) {
+            if (drill.hasDueCards()) {
                 return 1;
             } else {
                 return 0;

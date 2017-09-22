@@ -1,19 +1,19 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
 public class DeckInfo {
-    private int size;
-    private long oldest;
+    private final int total;
+    private final int due;
 
-    public DeckInfo(int size, long oldestCard) {
-        this.size = size;
-        this.oldest = oldestCard;
+    public DeckInfo(int total, int due) {
+        this.total = total;
+        this.due = due;
     }
 
-    public int getSize() {
-        return size;
+    public int getTotal() {
+        return total;
     }
 
-    public long getOldest() {
-        return oldest;
+    public int getDue() {
+        return due;
     }
 }

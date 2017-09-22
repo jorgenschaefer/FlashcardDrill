@@ -1,18 +1,13 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
-import android.os.Bundle;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public class Drill {
     private static final String STATE_CURRENT_DECK = "currentDeck";
     private final CardRepository repository;
 
-    private int currentDeck = 0;
-    private List<Card> currentCardList = new ArrayList<>();
+    private Card currentCard = null;
+    private DeckInfo info = null;
     private Runnable onChangeListener;
 
     public Drill(CardRepository repository) {
@@ -30,97 +25,60 @@ public class Drill {
         }
     }
 
-    public int getCurrentDeck() {
-        return currentDeck;
-    }
-
-    public void setCurrentDeck(int i) {
-        List<Card> newCards = repository.getDeck(i);
-        if (newCards.isEmpty()) {
-            return;
-        }
-        currentDeck = i;
-        currentCardList = newCards;
-        notifyChange();
-    }
-
-    public List<DeckInfo> getDeckSizes() {
-        return repository.getDeckInfos();
-    }
-
     public boolean hasCards() {
-        return !currentCardList.isEmpty();
+        DeckInfo info = repository.getDeckInfo();
+        return info.getTotal() > 0;
+    }
+
+    public boolean hasDueCards() {
+        DeckInfo info = repository.getDeckInfo();
+        return info.getDue() > 0;
     }
 
     public String getCurrentQuestion() {
-        return currentCardList.get(0).getQuestion();
+        return currentCard.getQuestion();
     }
 
     public String getCurrentAnswer() {
-        return currentCardList.get(0).getAnswer();
+        return currentCard.getAnswer();
     }
 
     public void onAnswerCorrect() {
-        repository.moveCard(currentCardList.get(0), currentDeck + 1);
+        currentCard.markCorrect();
+        repository.moveCard(currentCard);
         nextCard();
     }
 
     public void onAnswerIncorrect() {
-        repository.moveCard(currentCardList.get(0), 0);
+        currentCard.markIncorrect();
+        repository.moveCard(currentCard);
         nextCard();
-    }
-
-    public void onLoadCards(Iterable<Card> cards) {
-        for (Card card : cards) {
-            repository.insertOrUpdateCard(card);
-        }
-        reload();
     }
 
     public void onClearCards() {
         repository.clearCards();
-        currentDeck = 0;
-        currentCardList = new ArrayList<>();
+        info = repository.getDeckInfo();
+        currentCard = null;
         notifyChange();
-    }
-
-    public void setState(Bundle state) {
-        currentDeck = state.getInt(STATE_CURRENT_DECK);
-        currentCardList = repository.getDeck(currentDeck);
-        notifyChange();
-    }
-
-    public Bundle getState() {
-        Bundle state = new Bundle();
-        state.putInt(STATE_CURRENT_DECK, currentDeck);
-        return state;
-    }
-
-    private void nextCard() {
-        if (!currentCardList.isEmpty()) {
-            currentCardList.remove(0);
-        }
-        if (currentCardList.isEmpty()) {
-            currentDeck = nextDeck(0);
-            currentCardList = repository.getDeck(currentDeck);
-        }
-        notifyChange();
-    }
-
-    private int nextDeck(int start) {
-        List<DeckInfo> infos = repository.getDeckInfos();
-        for (int i = start; i < infos.size(); i++) {
-            if (infos.get(i).getSize() > 0) {
-                return i;
-            }
-        }
-        return 0;
     }
 
     public void reload() {
-        if (currentCardList.isEmpty()) {
+        if (currentCard == null) {
             nextCard();
-            notifyChange();
         }
+    }
+
+    public int getNumberOfDueCards() {
+        return info.getDue();
+    }
+
+    public int getNumberOfTotalCards() {
+        return info.getTotal();
+    }
+
+    private void nextCard() {
+        info = repository.getDeckInfo();
+        currentCard = repository.getNextCard();
+        notifyChange();
     }
 }
