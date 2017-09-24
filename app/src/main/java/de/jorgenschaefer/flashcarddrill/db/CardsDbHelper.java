@@ -45,47 +45,42 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         if (oldVersion <= 2) {
             db.execSQL(SQL_UPDATE_V2_TO_V3);
         }
-        if (oldVersion <= 6) {
-            String[] projection = {
-                    CardsDbContract.Card._ID,
-                    CardsDbContract.Card.DECK,
-                    CardsDbContract.Card.UPDATED_AT
-            };
-            String selection = CardsDbContract.Card.DUE_AT + " <= ?";
-            String[] selectionArgs = { Long.toString(new Date().getTime()) };
-            Cursor cursor = db.query(
-                    CardsDbContract.Card.TABLE_NAME,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null,
-                    null,
-                    CardsDbContract.Card.DECK + ", " + CardsDbContract.Card.UPDATED_AT + " DESC",
-                    null
+        if (oldVersion <= 9) {
+            resetDueAt(db);
+        }
+    }
+
+    public void resetDueAt(SQLiteDatabase db) {
+        String[] projection = {
+                CardsDbContract.Card._ID,
+                CardsDbContract.Card.DECK,
+                CardsDbContract.Card.UPDATED_AT
+        };
+        Cursor cursor = db.query(
+                CardsDbContract.Card.TABLE_NAME,
+                projection,
+                null, null, null, null, null, null
+        );
+
+        while (cursor.moveToNext()) {
+            Card card = new Card(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card._ID)),
+                    "",
+                    "",
+                    cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card.DECK)),
+                    cursor.getLong(cursor.getColumnIndexOrThrow(CardsDbContract.Card.UPDATED_AT))
             );
 
-            if (cursor.moveToNext()) {
-                Card card = new Card(
-                        cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card._ID)),
-                        "",
-                        "",
-                        cursor.getInt(cursor.getColumnIndexOrThrow(CardsDbContract.Card.DECK)),
-                        cursor.getLong(cursor.getColumnIndexOrThrow(CardsDbContract.Card.UPDATED_AT))
-                );
-                ContentValues values = new ContentValues();
-                values.put(CardsDbContract.Card.DECK, card.getDeck());
-                values.put(CardsDbContract.Card.UPDATED_AT, card.getUpdatedAt());
-                values.put(CardsDbContract.Card.DUE_AT, card.getDueAt());
-
-                db.update(
-                        CardsDbContract.Card.TABLE_NAME,
-                        values,
-                        CardsDbContract.Card._ID + " = ?",
-                        new String[]{Integer.toString(card.getId())}
-                );
-            }
-            cursor.close();
+            ContentValues values = new ContentValues();
+            values.put(CardsDbContract.Card.DUE_AT, card.getDueAt());
+            int num = db.update(
+                    CardsDbContract.Card.TABLE_NAME,
+                    values,
+                    CardsDbContract.Card._ID + " = ?",
+                    new String[]{Integer.toString(card.getId())}
+            );
         }
+        cursor.close();
     }
 
     @Override
@@ -103,7 +98,7 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         if (cursor.moveToNext()) {
             due = cursor.getInt(0);
         }
-        return new DeckInfo(total, due);
+        return new DeckInfo(total, due, null, null);
     }
 
     @Override
@@ -200,17 +195,25 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
         int maxDeck = cursor.getInt(0);
         for (int i = 0; i <= maxDeck; i++) {
             int total = 0, due = 0;
-            projection = new String[]{"COUNT(*)", CardsDbContract.Card.DECK};
+            Date firstDueAt = null, lastDueAt = null;
+            projection = new String[]{
+                    CardsDbContract.Card.DECK,
+                    "COUNT(*)",
+                    "MIN(" + CardsDbContract.Card.DUE_AT + ")",
+                    "MAX(" + CardsDbContract.Card.DUE_AT + ")"
+            };
             cursor = db.query(
                     CardsDbContract.Card.TABLE_NAME,
                     projection,
                     CardsDbContract.Card.DECK + " = ?",
                     new String[]{ Integer.toString(i) },
-                    CardsDbContract.Card.DECK,
                     null,
-                    CardsDbContract.Card.DECK);
+                    null,
+                    null);
             if (cursor.moveToNext()) {
-                total = cursor.getInt(0);
+                total = cursor.getInt(1);
+                firstDueAt = new Date(cursor.getLong(2));
+                lastDueAt = new Date(cursor.getLong(3));
             }
             String selection = CardsDbContract.Card.DUE_AT + " <= ? AND " + CardsDbContract.Card.DECK + " = ?";
             String[] selectionArgs = new String[]{
@@ -226,9 +229,9 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                     null,
                     CardsDbContract.Card.DECK);
             if (cursor.moveToNext()) {
-                due = cursor.getInt(0);
+                due = cursor.getInt(1);
             }
-            infoList.add(new DeckInfo(total, due));
+            infoList.add(new DeckInfo(total, due, firstDueAt, lastDueAt));
         }
         return infoList;
     }

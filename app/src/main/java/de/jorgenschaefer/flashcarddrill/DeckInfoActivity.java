@@ -7,6 +7,7 @@ import android.util.TypedValue;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.jorgenschaefer.flashcarddrill.db.CardsDbHelper;
@@ -29,14 +30,18 @@ public class DeckInfoActivity extends AppCompatActivity {
         CardsDbHelper repository = new CardsDbHelper(this.getApplicationContext());
         List<DeckInfo> infoList = repository.getDeckInfoList();
         for (int i = 0; i < infoList.size(); i++) {
-            addInfo("Deck %d, %d due of %d total", i, infoList.get(i).getDue(), infoList.get(i).getTotal());
+            DeckInfo info = infoList.get(i);
+            String firstDueDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(info.getFirstDueDate());
+            String lastDueDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(info.getLastDueDate());
+            addInfo("Deck %d, %d due of %d total\n%s - %s", i, info.getDue(), info.getTotal(),
+                    firstDueDate, lastDueDate);
         }
     }
 
     public void addInfo(String format, Object... args) {
         TextView tv = new TextView(this.getApplicationContext());
         tv.setText(String.format(format, args));
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_PT, 14);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_PT, 10);
         layout.addView(tv);
     }
 }
