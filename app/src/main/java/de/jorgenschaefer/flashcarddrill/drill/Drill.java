@@ -1,5 +1,7 @@
 package de.jorgenschaefer.flashcarddrill.drill;
 
+import java.util.Date;
+
 import de.jorgenschaefer.flashcarddrill.db.Card;
 
 public class Drill {
@@ -80,5 +82,13 @@ public class Drill {
         info = repository.getDeckInfo();
         currentCard = repository.getNextCard();
         notifyChange();
+    }
+
+    public int getCurrentDeck() {
+        return currentCard.getDeck();
+    }
+
+    public Date getCurrentDueDate() {
+        return new Date(currentCard.getDueAt());
     }
 }

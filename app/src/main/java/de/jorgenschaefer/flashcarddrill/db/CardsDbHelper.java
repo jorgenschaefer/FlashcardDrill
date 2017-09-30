@@ -120,8 +120,8 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                 selectionArgs,
                 null,
                 null,
-                CardsDbContract.Card.DECK + ", " + CardsDbContract.Card.UPDATED_AT + " DESC",
-                null
+                CardsDbContract.Card.DUE_AT,
+                "1"
         );
 
         if (cursor.moveToNext()) {

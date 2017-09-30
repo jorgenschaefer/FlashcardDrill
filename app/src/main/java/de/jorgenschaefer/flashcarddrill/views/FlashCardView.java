@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
+
 import de.jorgenschaefer.flashcarddrill.R;
 import de.jorgenschaefer.flashcarddrill.drill.Drill;
 
@@ -59,11 +61,15 @@ public class FlashCardView extends RecyclerView {
         public class ViewHolder extends RecyclerView.ViewHolder {
             public TextView front;
             public TextView back;
+            public TextView deck;
+            public TextView due;
 
-            public ViewHolder(CardView v, TextView front, TextView back) {
+            public ViewHolder(CardView v, TextView front, TextView back, TextView deck, TextView due) {
                 super(v);
                 this.front = front;
                 this.back = back;
+                this.deck = deck;
+                this.due = due;
             }
         }
 
@@ -77,6 +83,8 @@ public class FlashCardView extends RecyclerView {
                     .inflate(R.layout.card, parent, false);
             final TextView front = (TextView) v.findViewById(R.id.card_front);
             final TextView back = (TextView) v.findViewById(R.id.card_back);
+            final TextView deck = (TextView) v.findViewById(R.id.card_deck);
+            final TextView due = (TextView) v.findViewById(R.id.card_due);
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -89,11 +97,15 @@ public class FlashCardView extends RecyclerView {
                     }
                 }
             });
-            return new ViewHolder(v, front, back);
+            return new ViewHolder(v, front, back, deck, due);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            String currentDueDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(drill.getCurrentDueDate());
+
+            holder.deck.setText("Deck " + drill.getCurrentDeck());
+            holder.due.setText("Due at " + currentDueDate);
             holder.front.setText(drill.getCurrentQuestion());
             holder.back.setText(drill.getCurrentAnswer());
             if (drill.getCurrentAnswer().contains("\n")) {
