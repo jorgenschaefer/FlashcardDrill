@@ -10,55 +10,58 @@
     card_view:cardCornerRadius="@dimen/cardview_default_radius"
     card_view:cardElevation="@dimen/cardview_default_elevation">
 
-    <android.support.constraint.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:layout_editor_absoluteY="4dp"
-        tools:layout_editor_absoluteX="3dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/card_deck"
-            android:layout_width="177dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintRight_toLeftOf="@+id/card_due"
-            card_view:layout_constraintLeft_toLeftOf="parent" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/card_due"
-            android:layout_width="177dp"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_margin="8dp"
-            card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintRight_toRightOf="parent" />
+            <TextView
+                android:text="Hello World Hello World Hello Q"
+                android:id="@+id/card_front"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="12pt"
+                android:layout_margin="8dp" />
 
-        <TextView
-            android:id="@+id/card_front"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="12pt"
-            android:layout_margin="8dp"
-            card_view:layout_constraintTop_toTopOf="parent"
-            card_view:layout_constraintRight_toRightOf="parent"
-            card_view:layout_constraintLeft_toLeftOf="parent"
-            card_view:layout_constraintBottom_toTopOf="@id/card_deck"  />
+            <TextView
+                android:id="@+id/card_back"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="5dp"
+                android:textSize="12pt"
+                android:layout_margin="8dp" />
 
-        <TextView
-            android:id="@+id/card_back"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="5dp"
-            android:textSize="12pt"
-            android:layout_margin="8dp"
-            card_view:layout_constraintTop_toTopOf="parent"
-            card_view:layout_constraintRight_toRightOf="parent"
-            card_view:layout_constraintLeft_toLeftOf="parent"
-            card_view:layout_constraintBottom_toTopOf="@id/card_deck"  />
+        </FrameLayout>
 
-    </android.support.constraint.ConstraintLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Deck 5"
+                android:id="@+id/card_deck"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:text="Due 2017"
+                android:id="@+id/card_due"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:layout_margin="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </android.support.v7.widget.CardView>
