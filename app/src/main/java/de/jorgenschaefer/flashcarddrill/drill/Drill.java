@@ -33,8 +33,7 @@ public class Drill {
     }
 
     public boolean hasDueCards() {
-        DeckInfo info = repository.getDeckInfo();
-        return info.getDue() > 0;
+        return currentCard != null;
     }
 
     public String getCurrentQuestion() {

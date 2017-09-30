@@ -17,6 +17,24 @@
         tools:layout_editor_absoluteX="3dp">
 
         <TextView
+            android:id="@+id/card_deck"
+            android:layout_width="177dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            card_view:layout_constraintBottom_toBottomOf="parent"
+            card_view:layout_constraintRight_toLeftOf="@+id/card_due"
+            card_view:layout_constraintLeft_toLeftOf="parent" />
+
+        <TextView
+            android:id="@+id/card_due"
+            android:layout_width="177dp"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_margin="8dp"
+            card_view:layout_constraintBottom_toBottomOf="parent"
+            card_view:layout_constraintRight_toRightOf="parent" />
+
+        <TextView
             android:id="@+id/card_front"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -40,24 +58,6 @@
             card_view:layout_constraintRight_toRightOf="parent"
             card_view:layout_constraintLeft_toLeftOf="parent"
             card_view:layout_constraintBottom_toTopOf="@id/card_deck"  />
-
-        <TextView
-            android:id="@+id/card_deck"
-            android:layout_width="177dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintRight_toLeftOf="@+id/card_due"
-            card_view:layout_constraintLeft_toLeftOf="parent" />
-
-        <TextView
-            android:id="@+id/card_due"
-            android:layout_width="177dp"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_margin="8dp"
-            card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintRight_toRightOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 

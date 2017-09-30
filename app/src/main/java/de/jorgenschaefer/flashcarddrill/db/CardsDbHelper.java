@@ -111,13 +111,11 @@ public class CardsDbHelper extends SQLiteOpenHelper implements CardRepository {
                 CardsDbContract.Card.DECK,
                 CardsDbContract.Card.UPDATED_AT
         };
-        String selection = CardsDbContract.Card.DUE_AT + " <= ?";
-        String[] selectionArgs = { Long.toString(new Date().getTime()) };
         Cursor cursor = db.query(
                 CardsDbContract.Card.TABLE_NAME,
                 projection,
-                selection,
-                selectionArgs,
+                null,
+                null,
                 null,
                 null,
                 CardsDbContract.Card.DUE_AT,
